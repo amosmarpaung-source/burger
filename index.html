@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Game Masak - Perfect Responsive Version</title>
+    <style>
+        /* --- RESET & OPTIMASI KHUSUS IPHONE, ANDROID, & PC --- */
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+        
+        * { 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-touch-callout: none; 
+            user-select: none; -webkit-user-select: none;
+            box-sizing: border-box; 
+        }
+        
+        body, html {
+            margin: 0; padding: 0; width: 100vw; 
+            height: 100vh; height: 100dvh; 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; justify-content: center; align-items: center; 
+            background-color: #1e272e; font-family: 'Nunito', sans-serif; 
+            overflow: hidden;
+        }
+        
+        /* Resolusi Dasar Game */
+        #game-wrapper { width: 1200px; height: 650px; transform-origin: center center; position: absolute; }
+        #game-board { width: 100%; height: 100%; background: #0abde3; position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 0 0 8px #0f6c8c; display: flex; flex-direction: column; }
+
+        /* PERINGATAN PUTAR LAYAR HP */
+        #portrait-warning {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #1e272e; color: #f1c40f; z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        #portrait-warning h1 { font-size: 50px; margin-bottom: 10px; }
+        #portrait-warning p { font-size: 20px; color: #fff; padding: 0 20px;}
+        @media screen and (orientation: portrait) { #game-wrapper { display: none !important; } #portrait-warning { display: flex; } }
+
+        /* Latar Belakang Aquarium */
+        .aquarium { position: absolute; top: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to bottom, #1dd1a1 0%, #0abde3 100%); z-index: 1; border-bottom: 12px solid #0a829e; }
+        .aquarium::after { content: ''; position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle at 15% 40%, rgba(255,255,255,0.15) 6px, transparent 8px), radial-gradient(circle at 80% 60%, rgba(255,255,255,0.15) 4px, transparent 6px); }
+
+        /* --- TOP BAR --- */
+        .top-bar { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 10; align-items: center; }
+        .timer-wrapper { background: #eccc68; border: 4px solid #c8d6e5; border-radius: 25px; padding: 5px 15px 5px 45px; position: relative; box-shadow: 0 6px 0 rgba(0,0,0,0.2); width: 300px; height: 25px; display: flex; align-items: center; }
+        .timer-icon { position: absolute; left: 5px; top: 0px; font-size: 26px; }
+        .timer-bar { width: 100%; height: 16px; background: #2f3640; border-radius: 10px; overflow: hidden; }
+        .timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); transition: width 1s linear;}
+        .cash-register { background: #2ed573; border: 4px solid #ffffff; padding: 8px 25px; border-radius: 20px; font-size: 24px; color: white; text-shadow: 2px 2px 0 #2f3542; box-shadow: 0 6px 0 rgba(0,0,0,0.2); font-weight: 900; }
+
+        /* --- AREA PELANGGAN --- */
+        .customer-area { height: 35%; display: flex; justify-content: center; align-items: flex-end; gap: 40px; z-index: 5; padding-bottom: 0px; }
+        .customer-slot { width: 160px; height: 190px; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+        .character { font-size: 110px; filter: drop-shadow(0 15px 8px rgba(0,0,0,0.4)); display: none; margin-bottom: -15px;}
+        .order-bubble { position: absolute; left: -80px; top: 10px; background: #fff; border-radius: 15px; border: 4px solid #ced6e0; padding: 10px; display: none; align-items: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 10; }
+        .order-bubble::after { content: ''; position: absolute; right: -12px; top: 40px; border: 8px solid transparent; border-left-color: #fff; z-index: 2; }
+        .order-bubble::before { content: ''; position: absolute; right: -18px; top: 38px; border: 10px solid transparent; border-left-color: #ced6e0; z-index: 1; }
+        .patience-bar-vert { width: 12px; height: 90px; background: #e74c3c; border-radius: 6px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);}
+        .patience-fill-vert { width: 100%; height: 100%; background: linear-gradient(to top, #2ecc71, #27ae60); transition: height 1s linear; transform-origin: bottom; }
+        .order-items { display: flex; flex-direction: column; align-items: center; gap: 5px;}
+        .order-item-icon { font-size: 38px; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2)); }
+        .order-price { font-size: 16px; color: #1e90ff; background: #f1f2f6; padding: 2px 10px; border-radius: 8px; font-weight: 900;}
+
+        /* --- AREA DAPUR --- */
+        .kitchen-area { height: 65%; display: grid; grid-template-columns: 0.8fr 0.5fr 2fr 1.6fr 1.1fr; background: #1e272e; border-top: 10px solid #1e272e; }
+        .col { border-right: 5px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; }
+        .col:last-child { border-right: none; }
+        
+        .area-top { 
+            flex: 1.3; background-color: #576574; background-image: url('./dinding_kayu.jpg'); 
+            background-size: cover; background-position: center bottom;
+            display: flex; justify-content: center; align-items: center; padding: 10px; position: relative; 
+            box-shadow: inset 0 -15px 20px rgba(0,0,0,0.5); 
+        }
+        
+        .area-bottom { 
+            flex: 1; background-color: #222f3e; background-image: url('./meja.jpg'); 
+            background-size: cover; background-position: center top;
+            display: flex; justify-content: center; align-items: center; 
+            padding: 10px; padding-bottom: 28px; 
+            position: relative; 
+            box-shadow: inset 0 10px 15px rgba(0,0,0,0.4); 
+        }
+
+        /* --- KOMPONEN UI UMUM --- */
+        .plate-c *, .plate-s *, .bin-btn *, .mini-btn * { pointer-events: none; }
+        .plate-c, .plate-s { background: #f1f2f6; box-shadow: 0 6px 0 #c8d6e5, inset 0 -4px 5px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: filter 0.1s, transform 0.1s; border: 2px solid #fff; position: relative;}
+        .plate-c { width: 55px; height: 55px; border-radius: 50%; font-size: 32px;}
+        .plate-s { width: 50px; height: 50px; border-radius: 10px; font-size: 30px;}
+        
+        .bin-btn { border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 35px; cursor: pointer; position: relative; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 8px 0 rgba(0,0,0,0.3); transition: filter 0.1s, transform 0.1s;}
+        .mini-btn { width: 50px; height: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 0 #bdc3c7; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; transition: filter 0.1s, transform 0.1s;}
+        
+        .bin-btn:active, .plate-c:active, .plate-s:active, .mini-btn:active { filter: brightness(0.75); transform: scale(0.9); }
+
+        /* LOADING BAR CSS */
+        .prog-bar { position: absolute; bottom: -18px; left: -10%; width: 120%; height: 14px; background: #2f3640; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.7); overflow: hidden; display: none; z-index: 50; pointer-events: none;}
+        .prog-fill { height: 100%; pointer-events: none; }
+        @keyframes runLoadingBar { 0% { width: 0%; background: #e74c3c; } 50% { background: #f1c40f; } 100% { width: 100%; background: #2ecc71; } }
+
+        /* --- TATA LETAK MESIN --- */
+        .machine-container-slot {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .machine-wrapper { 
+            position: relative; cursor: pointer; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; width: 90%; height: 90%; z-index: 20;
+            transition: filter 0.1s, transform 0.1s;
+        }
+        .machine-wrapper * { pointer-events: none; }
+        .machine-wrapper:active { filter: brightness(0.85); transform: scale(0.97); }
+        
+        .machine-img { 
+            width: auto; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain;
+        }
+        .machine-working .machine-img { animation: machinePump 0.4s infinite alternate ease-in-out; filter: brightness(1.2); }
+        @keyframes machinePump { 0% {transform: translateY(0) scaleY(1);} 100% {transform: translateY(2px) scaleY(0.97);} }
+
+        .machine-tray { position: absolute; bottom: 8px; left: 0; width: 100%; display: flex; justify-content: center; gap: 6px; z-index: 25; }
+        .internal-slot { width: 32px; height: 40px; display: flex; justify-content: center; align-items: flex-end; position: relative; }
+
+        /* --- EFEK ANIMASI MENUANG --- */
+        .craft-wrap { display: flex; flex-direction: column; align-items: center; position: relative; width: 100%; height: 100%;}
+        .craft-stream { position: absolute; top: -50px; opacity: 0; z-index: 1; border-radius: 4px; }
+        
+        .stream-d { width: 6px; background: #e1b12c; animation-name: streamFall; animation-fill-mode: forwards; animation-timing-function: ease-in; } 
+        .stream-ic { width: 12px; background: #fd79a8; animation-name: streamFall; animation-fill-mode: forwards; animation-timing-function: ease-in; }
+
+        .craft-cup { width: 22px; height: 30px; border: 2px solid rgba(255,255,255,0.8); border-top: none; border-radius: 0 0 5px 5px; position: absolute; bottom: 0; overflow: hidden; background: rgba(0,0,0,0.4); opacity: 0; animation: popIn 0.2s forwards; }
+        .craft-cone { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 25px solid #e1b12c; border-radius: 4px; opacity: 0; animation: popIn 0.2s forwards; position: absolute; bottom: 0; z-index: 1;}
+        .craft-liquid { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #e1b12c; animation-name: fillUp; animation-fill-mode: forwards; animation-timing-function: linear;} 
+        .craft-cream { width: 26px; height: 22px; background: #fd79a8; border-radius: 50% 50% 5px 5px; position: absolute; bottom: 20px; transform: scale(0); transform-origin: bottom center; animation-name: pumpCream; animation-fill-mode: forwards; animation-timing-function: linear; z-index: 2; }
+
+        @keyframes streamFall { 0% { height: 0; top: -50px; opacity: 1; } 15% { height: 45px; top: -50px; opacity: 1; } 85% { height: 45px; top: -50px; opacity: 1; } 100% { height: 0; top: -5px; opacity: 0; } }
+        @keyframes fillUp { 0% { height: 0%; } 100% { height: 95%; } }
+        @keyframes pumpCream { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes popIn { to { opacity: 1; } }
+
+        .ready-food { font-size: 38px; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.8)); position: absolute; bottom: 0; pointer-events: none;}
+
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        .shake { animation: shake 0.2s ease-in-out 2; }
+        .food-pop { animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% {transform: scale(0.5);} 100% {transform: scale(1);} }
+
+        #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; color: white;}
+    </style>
+</head>
+<body>
+
+    <div id="portrait-warning">
+        <h1>📱</h1><h2>Sila Pusingkan Skrin Telefon Anda</h2>
+        <p>Permainan ini direka khusus untuk mod mendatar (Landscape).</p>
+    </div>
+
+    <div id="game-wrapper">
+        <div id="game-board">
+            <div class="aquarium"></div>
+
+            <div id="game-over">
+                <h1>MASA TAMAT!</h1>
+                <h2 id="final-score">Pendapatan: 💵 0</h2>
+                <button style="background: #0984e3; color: white; padding: 20px 50px; font-size: 30px; border-radius: 40px; cursor: pointer; border: 6px solid #fff; font-weight: 900; box-shadow: 0 10px 0 #0652dd; margin-top: 20px;" onclick="restartGame()">MAIN LAGI</button>
+            </div>
+
+            <div class="top-bar">
+                <div class="timer-wrapper"><span class="timer-icon">⏰</span><div class="timer-bar"><div class="timer-fill" id="timer-bar-fill"></div></div></div>
+                <div class="cash-register" id="money-display">💵 0</div>
+            </div>
+
+            <div class="customer-area" id="customers">
+                <div class="customer-slot" id="cust-0"><div class="order-bubble" id="ui-0"><div class="patience-bar-vert"><div class="patience-fill-vert" id="pat-0"></div></div><div class="order-items"><div class="order-item-icon" id="ord-icon-0">🍔</div><div class="order-price" id="ord-prc-0">45</div></div></div><div class="character" id="char-0">👨</div></div>
+                <div class="customer-slot" id="cust-1"><div class="order-bubble" id="ui-1"><div class="patience-bar-vert"><div class="patience-fill-vert" id="pat-1"></div></div><div class="order-items"><div class="order-item-icon" id="ord-icon-1">🍕</div><div class="order-price" id="ord-prc-1">50</div></div></div><div class="character" id="char-1">👩</div></div>
+                <div class="customer-slot" id="cust-2"><div class="order-bubble" id="ui-2"><div class="patience-bar-vert"><div class="patience-fill-vert" id="pat-2"></div></div><div class="order-items"><div class="order-item-icon" id="ord-icon-2">☕</div><div class="order-price" id="ord-prc-2">15</div></div></div><div class="character" id="char-2">👦</div></div>
+            </div>
+
+            <div class="kitchen-area">
+                
+                <div class="col" style="justify-content: flex-start; align-items: center; background: #2f3640;">
+                    
+                    <div class="machine-container-slot" style="border-bottom: 3px solid rgba(0,0,0,0.3);">
+                        <div class="machine-wrapper" id="machine-drink-wrap" onclick="handleMachineClick('drink', '☕', 1500, this)">
+                            <img src="./mesin kopi.png.webp" onerror="this.src='https://via.placeholder.com/150x200/e74c3c/fff?text=Mesin+Air'" class="machine-img" style="border: none; background: transparent; box-shadow: none;" alt="Mesin Kopi 3D">
+                            <div class="machine-tray">
+                                <div class="internal-slot" id="plate-drink-1" data-state="empty"></div>
+                                <div class="internal-slot" id="plate-drink-2" data-state="empty"></div>
+                                <div class="internal-slot" id="plate-drink-3" data-state="empty"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="machine-container-slot">
+                        <div class="machine-wrapper" id="machine-icecream-wrap" onclick="handleMachineClick('icecream', '🍦', 1500, this)">
+                            <img src="./WhatsApp Image 2026-06-18 at 13.16.36.jpeg" onerror="this.src='https://via.placeholder.com/150x200/f39c12/fff?text=Mesin+Es'" class="machine-img" style="border-radius: 12px; border: 3px solid #1e272e; box-shadow: 0 8px 12px rgba(0,0,0,0.6);" alt="Mesin Es Krim">
+                            <div class="machine-tray">
+                                <div class="internal-slot" id="plate-icecream-1" data-state="empty"></div>
+                                <div class="internal-slot" id="plate-icecream-2" data-state="empty"></div>
+                                <div class="internal-slot" id="plate-icecream-3" data-state="empty"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col">
+                    <div class="area-top" style="flex-direction: column; gap: 8px;">
+                        <div style="position: relative;"><div class="plate-s" id="plate-fries-1" onclick="selectFood('🍟', this)"></div><div class="prog-bar" id="prog-wrap-fries-1"></div></div>
+                        <div style="position: relative;"><div class="plate-s" id="plate-fries-2" onclick="selectFood('🍟', this)"></div><div class="prog-bar" id="prog-wrap-fries-2"></div></div>
+                        <div style="position: relative;"><div class="plate-s" id="plate-chicken-1" onclick="selectFood('🍗', this)"></div><div class="prog-bar" id="prog-wrap-chicken-1"></div></div>
+                        <div style="position: relative;"><div class="plate-s" id="plate-chicken-2" onclick="selectFood('🍗', this)"></div><div class="prog-bar" id="prog-wrap-chicken-2"></div></div>
+                    </div>
+                    <div class="area-bottom" style="gap: 15px;">
+                        <div style="display: flex; gap: 10px;">
+                            <div class="bin-btn" style="background: #f1c40f; border-color: #f39c12; width: 60px; height: 80px;" onclick="cookIndependent('fries', '🍟', 2000, 2, this)"><div style="font-size: 28px;">🍟</div></div>
+                            <div class="bin-btn" style="background: #e67e22; border-color: #d35400; width: 60px; height: 80px;" onclick="cookIndependent('chicken', '🍗', 3000, 2, this)"><div style="font-size: 28px;">🍗</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="area-top" style="gap: 20px; justify-content: center;">
+                        <div style="background: rgba(45, 52, 54, 0.7); border: 3px solid #57606f; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);">
+                            <div class="mini-btn" style="background: transparent; box-shadow: none;" onclick="addPizzaIng('🧅', this)">
+                                <img src="./bawang.png" onerror="this.outerHTML='🧅'" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.4));" alt="Bawang">
+                            </div>
+                            <div class="mini-btn" style="background: #ffb142;" onclick="addPizzaIng('🌭', this)">🌭</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="plate-c" id="plate-saji-pizza-1" onclick="servePizza(1)"></div>
+                            <div class="plate-c" id="plate-saji-pizza-2" onclick="servePizza(2)"></div>
+                            <div class="plate-c" id="plate-saji-pizza-3" onclick="servePizza(3)"></div>
+                            <div class="plate-c" id="plate-saji-pizza-4" onclick="servePizza(4)"></div>
+                        </div>
+                    </div>
+                    <div class="area-bottom" style="gap: 15px;">
+                        <div class="bin-btn" style="background: #fbc531; width: 70px; height: 80px;" onclick="addPizzaIng('🍞', this)">
+                            <div style="font-size: 30px;">🍞</div>
+                        </div>
+                        <div style="background: #130f40; width: 180px; height: 120px; border-radius: 15px; border: 5px solid #30336b; display: flex; flex-direction: column; align-items: center; padding: 12px; padding-top: 18px; box-sizing: border-box; position: relative; box-shadow: inset 0 15px 20px rgba(0,0,0,0.8);">
+                            <div style="position: absolute; top: -12px; background: #30336b; color: white; padding: 2px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; border: 2px solid #130f40;">OVEN SLOT</div>
+                            <div style="width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; z-index: 2;">
+                                <div id="oven-slot-1" onclick="manualMovePizza(1)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-1" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-1"></div></div>
+                                <div id="oven-slot-2" onclick="manualMovePizza(2)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-2" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-2"></div></div>
+                                <div id="oven-slot-3" onclick="manualMovePizza(3)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-3" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-3"></div></div>
+                                <div id="oven-slot-4" onclick="manualMovePizza(4)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-4" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-4"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="area-top" style="display: flex; gap: 15px; justify-content: center;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="plate-c" id="plate-burger-1" onclick="serveBurger(1)" style="flex-direction: column-reverse; font-size: 20px;"></div>
+                            <div class="plate-c" id="plate-burger-2" onclick="serveBurger(2)" style="flex-direction: column-reverse; font-size: 20px;"></div>
+                            <div class="plate-c" id="plate-burger-3" onclick="serveBurger(3)" style="flex-direction: column-reverse; font-size: 20px;"></div>
+                            <div class="plate-c" id="plate-burger-4" onclick="serveBurger(4)" style="flex-direction: column-reverse; font-size: 20px;"></div>
+                        </div>
+                        <div style="background: rgba(241, 242, 246, 0.8); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);">
+                            <div class="mini-btn" style="background:#7bed9f;" onclick="addBurgerIng('🥬', this)">🥬</div>
+                            <div class="mini-btn" style="background:#ff6b81;" onclick="addBurgerIng('🍅', this)">🍅</div>
+                        </div>
+                    </div>
+                    <div class="area-bottom">
+                        <div class="bin-btn" style="background: #f39c12; width: 110px; height: 90px; border-radius: 10px; border: 3px solid #ffbe76;" onclick="addBurgerIng('🍞', this)">
+                            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:2px; margin-top: -10px;">
+                                <span style="font-size:25px;">🍞</span><span style="font-size:25px;">🍞</span>
+                                <span style="font-size:25px;">🍞</span><span style="font-size:25px;">🍞</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="area-top">
+                        <div style="background: rgba(45, 52, 54, 0.8); border: 5px solid #1e272e; border-radius: 15px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);">
+                            <div style="position: relative;"><div class="plate-c" id="plate-grill-1" onclick="moveMeatToBurger(this)" style="background: #1e272e; border: none; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); width: 55px; height: 55px; font-size: 35px;"></div><div class="prog-bar" id="prog-wrap-grill-1"></div></div>
+                            <div style="position: relative;"><div class="plate-c" id="plate-grill-2" onclick="moveMeatToBurger(this)" style="background: #1e272e; border: none; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); width: 55px; height: 55px; font-size: 35px;"></div><div class="prog-bar" id="prog-wrap-grill-2"></div></div>
+                            <div style="position: relative;"><div class="plate-c" id="plate-grill-3" onclick="moveMeatToBurger(this)" style="background: #1e272e; border: none; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); width: 55px; height: 55px; font-size: 35px;"></div><div class="prog-bar" id="prog-wrap-grill-3"></div></div>
+                            <div style="position: relative;"><div class="plate-c" id="plate-grill-4" onclick="moveMeatToBurger(this)" style="background: #1e272e; border: none; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); width: 55px; height: 55px; font-size: 35px;"></div><div class="prog-bar" id="prog-wrap-grill-4"></div></div>
+                        </div>
+                    </div>
+                    <div class="area-bottom">
+                        <div class="bin-btn" style="background: #ff6b81; border-color: #ff4757; width: 100px; height: 80px;" onclick="cookMeat(this)">
+                            <div style="display:flex; justify-content:center; gap:5px;"><span style="font-size:35px;">🥩</span><span style="font-size:35px;">🥩</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateScale() {
+            const wrapper = document.getElementById('game-wrapper');
+            const scaleX = window.innerWidth / 1200;
+            const scaleY = window.innerHeight / 650;
+            wrapper.style.transform = `scale(${Math.min(scaleX, scaleY) * 0.90})`;
+        }
+        window.addEventListener('resize', updateScale);
+        window.addEventListener('orientationchange', updateScale);
+        updateScale(); 
+
+        const DURATION = 90;
+        let timeRemaining = DURATION, money = 0, isPlaying = false, timerInt, spawnInt;
+        
+        // FIX KUNCI: Menyelaraskan ikon menu dengan fungsi penangan klik agar data tidak bentrok
+        const MENU = [
+            { icon: '☕', price: 15 }, { icon: '🍦', price: 25 },
+            { icon: '🍟', price: 20 }, { icon: '🍗', price: 35 },
+            { icon: '🍕', price: 50 }, { icon: '🍔', price: 45 }
+        ];
+        const CHARS = ['👨', '👩', '👦', '👧', '👨‍🦰', '👩‍🦰'];
+        let customers = [null, null, null];
+        
+        let cookingRegistry = {
+            fries: { 1: false, 2: false },
+            chicken: { 1: false, 2: false },
+            grill: { 1: false, 2: false, 3: false, 4: false },
+            oven: { 1: false, 2: false, 3: false, 4: false }
+        };
+        
+        let burgerPlates = []; let ovenSlots = []; let pizzaServingPlates = [0, 0, 0, 0]; 
+
+        function initPlates() {
+            burgerPlates = []; ovenSlots = []; pizzaServingPlates = [0, 0, 0, 0];
+            for(let i=0; i<4; i++) {
+                burgerPlates.push({ buns: 0, meat: false, tom: false, let: false, done: false });
+                ovenSlots.push({ bread: false, oni: false, sau: false, cooking: false, done: false });
+            }
+        }
+
+        function spawnCustomer() {
+            if(!isPlaying) return;
+            const idx = customers.findIndex(c => c === null);
+            if(idx !== -1) {
+                const m = MENU[Math.floor(Math.random()*MENU.length)], c = CHARS[Math.floor(Math.random()*CHARS.length)];
+                customers[idx] = { menu: m, pat: 15000, max: 15000 };
+                document.getElementById(`char-${idx}`).innerText = c;
+                document.getElementById(`char-${idx}`).style.display = 'block';
+                document.getElementById(`ord-icon-${idx}`).innerText = m.icon;
+                document.getElementById(`ord-prc-${idx}`).innerText = m.price;
+                
+                let ui = document.getElementById(`ui-${idx}`);
+                ui.style.display = 'flex';
+                ui.classList.add('food-pop'); setTimeout(() => ui.classList.remove('food-pop'), 300);
+
+                let p = document.getElementById(`pat-${idx}`);
+                p.style.height = '100%'; p.style.background = 'linear-gradient(to top, #2ecc71, #27ae60)';
+                
+                customers[idx].int = setInterval(() => {
+                    if(!isPlaying) return;
+                    customers[idx].pat -= 100;
+                    let pct = (customers[idx].pat / customers[idx].max) * 100;
+                    p.style.height = pct+'%';
+                    if(pct < 40) p.style.background = 'linear-gradient(to top, #f1c40f, #f39c12)';
+                    if(pct < 15) p.style.background = 'linear-gradient(to top, #e74c3c, #c0392b)';
+                    if(pct <= 0) removeCustomer(idx);
+                }, 100);
+            }
+        }
+
+        function removeCustomer(i) {
+            if(customers[i]) { clearInterval(customers[i].int); customers[i] = null; document.getElementById(`char-${i}`).style.display = 'none'; document.getElementById(`ui-${i}`).style.display = 'none'; }
+        }
+
+        function shakeEl(el) { el.classList.add('shake'); setTimeout(() => el.classList.remove('shake'), 400); }
+        function popEl(el) { el.classList.add('food-pop'); setTimeout(() => el.classList.remove('food-pop'), 200); }
+
+        function runProgressBar(wrapId, duration) {
+            let wrap = document.getElementById(wrapId);
+            if(wrap) {
+                wrap.style.display = 'block';
+                wrap.innerHTML = `<div class="prog-fill" style="animation: runLoadingBar ${duration}ms linear forwards;"></div>`;
+            }
+        }
+
+        function pressEl(el) {
+            if(!el) return;
+            el.style.transform = 'scale(0.9)';
+            setTimeout(() => { el.style.transform = ''; }, 100);
+        }
+
+        function handleMachineClick(type, icon, t, wrapperEl) {
+            if(!isPlaying) return;
+
+            let custIdx = customers.findIndex(c => c && c.menu.icon === icon);
+            let readySlotIdx = -1;
+            
+            for(let i=1; i<=3; i++) {
+                let slot = document.getElementById(`plate-${type}-${i}`);
+                if(slot && slot.getAttribute('data-state') === 'ready') { readySlotIdx = i; break; }
+            }
+
+            if(custIdx !== -1 && readySlotIdx !== -1) {
+                pressEl(wrapperEl);
+                money += customers[custIdx].menu.price; 
+                document.getElementById('money-display').innerText = `💵 ${money}`;
+                
+                let slot = document.getElementById(`plate-${type}-${readySlotIdx}`);
+                slot.innerHTML = '';
+                slot.removeAttribute('data-food');
+                slot.setAttribute('data-state', 'empty');
+                removeCustomer(custIdx);
+                return; 
+            }
+
+            let emptySlotIdx = -1;
+            for(let i=1; i<=3; i++) {
+                let slot = document.getElementById(`plate-${type}-${i}`);
+                if(slot && slot.getAttribute('data-state') === 'empty') { emptySlotIdx = i; break; }
+            }
+
+            if(emptySlotIdx === -1) { shakeEl(wrapperEl); return; } 
+
+            pressEl(wrapperEl);
+            let imgEl = wrapperEl.querySelector('.machine-img');
+            if(imgEl) imgEl.classList.add('machine-working');
+
+            let slot = document.getElementById(`plate-${type}-${emptySlotIdx}`);
+            slot.setAttribute('data-state', 'cooking');
+
+            if (type === 'drink') {
+                slot.innerHTML = `<div class="craft-wrap"><div class="craft-stream stream-d" style="animation-duration: ${t}ms;"></div><div class="craft-cup"><div class="craft-liquid" style="animation-duration: ${t}ms;"></div></div></div>`;
+            } else {
+                slot.innerHTML = `<div class="craft-wrap"><div class="craft-stream stream-ic" style="animation-duration: ${t}ms;"></div><div class="craft-cream" style="animation-duration: ${t}ms;"></div><div class="craft-cone"></div></div>`;
+            }
+
+            setTimeout(() => {
+                if(slot.getAttribute('data-state') === 'cooking') {
+                    slot.setAttribute('data-state', 'ready');
+                    slot.setAttribute('data-food', icon); 
+                    slot.innerHTML = `<div class="ready-food">${icon}</div>`;
+                    popEl(slot);
+                }
+                
+                let isStillCooking = false;
+                for(let i=1; i<=3; i++) {
+                    let s = document.getElementById(`plate-${type}-${i}`);
+                    if(s && s.getAttribute('data-state') === 'cooking') isStillCooking = true;
+                }
+                if(!isStillCooking && imgEl) imgEl.classList.remove('machine-working');
+            }, t);
+        }
+
+        function cookIndependent(type, icon, t, limit, btnEl) {
+            if(!isPlaying) return;
+            let targetIdx = -1;
+            
+            for(let i=1; i<=limit; i++) {
+                let el = document.getElementById(`plate-${type}-${i}`);
+                if(el && !el.getAttribute('data-food') && !cookingRegistry[type][i]) { 
+                    targetIdx = i; 
+                    break; 
+                }
+            }
+            if(targetIdx === -1) { shakeEl(btnEl); return; }
+            
+            pressEl(btnEl);
+            cookingRegistry[type][targetIdx] = true;
+            runProgressBar(`prog-wrap-${type}-${targetIdx}`, t);
+
+            setTimeout(() => {
+                cookingRegistry[type][targetIdx] = false;
+                let wrap = document.getElementById(`prog-wrap-${type}-${targetIdx}`);
+                if(wrap) wrap.style.display = 'none';
+
+                let el = document.getElementById(`plate-${type}-${targetIdx}`);
+                if(el) { 
+                    el.innerHTML = icon; 
+                    el.setAttribute('data-food', icon); 
+                    popEl(el); 
+                }
+            }, t);
+        }
+
+        function cookMeat(bin) { cookIndependent('grill', '🥩', 3000, 4, bin); }
+
+        function isEmptyBurger(p) { return p.buns === 0 && !p.meat && !p.tom && !p.let && !p.done; }
+        function findBurgerSlot(ing) {
+            let key = (ing === '🍞') ? 'buns' : (ing === '🥩' ? 'meat' : (ing === '🍅' ? 'tom' : 'let'));
+            let maxCount = (ing === '🍞') ? 2 : 1;
+            for(let i=0; i<4; i++) { let p = burgerPlates[i]; if (!p.done && !isEmptyBurger(p)) { let currentVal = (key === 'buns') ? p.buns : (p[key] ? 1 : 0); if (currentVal < maxCount) return i; } }
+            for(let i=0; i<4; i++) { if (isEmptyBurger(burgerPlates[i])) return i; } return -1;
+        }
+
+        function addBurgerIng(ing, btn) {
+            if(!isPlaying) return;
+            let idx = findBurgerSlot(ing);
+            if(idx === -1) { shakeEl(btn); return; }
+            
+            pressEl(btn);
+            let p = burgerPlates[idx];
+            if (ing === '🍞') p.buns++; else if (ing === '🍅') p.tom = true; else if (ing === '🥬') p.let = true;
+            checkBurgerComplete(idx);
+            
+            let el = document.getElementById(`plate-burger-${idx+1}`);
+            if(el) popEl(el);
+        }
+
+        function moveMeatToBurger(source) {
+            if(!isPlaying || source.getAttribute('data-food') !== '🥩') { shakeEl(source); return; }
+            let idx = findBurgerSlot('🥩');
+            if(idx === -1) { shakeEl(source); return; }
+            
+            burgerPlates[idx].meat = true; 
+            source.innerHTML = ''; source.removeAttribute('data-food');
+            checkBurgerComplete(idx);
+            
+            let el = document.getElementById(`plate-burger-${idx+1}`);
+            if(el) popEl(el);
+        }
+
+        function checkBurgerComplete(idx) {
+            let p = burgerPlates[idx];
+            if (p.buns === 2 && p.meat && p.tom && p.let) p.done = true;
+            renderBurgerPlate(idx);
+        }
+
+        function renderBurgerPlate(idx) {
+            let el = document.getElementById(`plate-burger-${idx+1}`); let p = burgerPlates[idx]; el.innerHTML = '';
+            if (isEmptyBurger(p)) return;
+            if (p.done) { el.innerText = '🍔'; el.style.fontSize = '40px'; popEl(el); return; } 
+            el.style.fontSize = '18px';
+            if(p.buns === 2) el.innerHTML += '<div class="b-layer">🍞</div>';
+            if(p.let) el.innerHTML += '<div class="b-layer">🥬</div>';
+            if(p.tom) el.innerHTML += '<div class="b-layer">🍅</div>';
+            if(p.meat) el.innerHTML += '<div class="b-layer">🥩</div>';
+            if(p.buns >= 1) el.innerHTML += '<div class="b-layer">🍞</div>';
+        }
+
+        function serveBurger(num) {
+            let idx = num-1;
+            if(burgerPlates[idx].done) {
+                let el = document.getElementById(`plate-burger-${num}`);
+                el.setAttribute('data-food', '🍔'); 
+                selectFood('🍔', el, () => {
+                    burgerPlates[idx] = {buns:0, meat:false, tom:false, let:false, done:false}; 
+                    renderBurgerPlate(idx); 
+                });
+            } else if (!isEmptyBurger(burgerPlates[idx])) { shakeEl(document.getElementById(`plate-burger-${num}`)); }
+        }
+
+        function isEmptyPizza(p) { return !p.bread && !p.oni && !p.sau && !p.cooking && !p.done; }
+        function findPizzaSlot(ing) {
+            let key = (ing === '🍞') ? 'bread' : (ing === '🧅' ? 'oni' : 'sau');
+            for(let i=0; i<4; i++) { let p = ovenSlots[i]; if (!p.done && !p.cooking && !p[key] && !isEmptyPizza(p)) return i; }
+            for(let i=0; i<4; i++) { if (isEmptyPizza(ovenSlots[i])) return i; } return -1;
+        }
+
+        /* --- FIX FIX: PERBAIKAN LOGIKA TEMPLATE LITERAL OVEN --- */
+        function addPizzaIng(ing, btn) {
+            if(!isPlaying) return;
+            let idx = findPizzaSlot(ing);
+            if (idx === -1) { shakeEl(btn); return; }
+            
+            pressEl(btn);
+            let p = ovenSlots[idx];
+            if (ing === '🍞') p.bread = true; else if (ing === '🧅') p.oni = true; else if (ing === '🌭') p.sau = true;
+            renderOvenSlot(idx);
+            
+            // FIX: Menggunakan template literal yang dijamin tereksekusi tanpa crash
+            let el = document.getElementById(`oven-content-${idx+1}`);
+            if(el) popEl(el);
+            
+            if (p.bread && p.oni && p.sau) { startPizzaCooking(idx); }
+        }
+
+        function renderOvenSlot(idx) {
+            let contentEl = document.getElementById(`oven-content-${idx+1}`); let p = ovenSlots[idx]; contentEl.innerHTML = '';
+            if (p.done) { contentEl.innerHTML = '<div style="font-size:25px;">🍕</div>'; } 
+            else if (p.cooking) { contentEl.innerHTML = '<div style="font-size:20px; color:#f1c40f;">⏳</div>'; } 
+            else if (!isEmptyPizza(p)) {
+                let html = p.bread ? '<div style="width: 25px; height: 25px; background: #f3c76d; border: 2px solid #e1a328; border-radius: 50%; position: absolute; z-index: 1;"></div>' 
+                                   : '<div style="width: 25px; height: 25px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 50%; position: absolute; z-index: 1;"></div>';
+                html += '<div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 10px;">';
+                if(p.oni) html += `<img src="./bawang.png" onerror="this.outerHTML='<div style=line-height:0.5;margin-top:2px;>🧅</div>'" style="width: 20px; height: 20px; position: absolute; z-index: 3; top: -5px;" alt="onion">`;
+                if(p.sau) html += '<div style="line-height: 0.5;">🌭</div>';
+                html += '</div>'; contentEl.innerHTML = html;
+            }
+        }
+
+        function startPizzaCooking(idx) {
+            ovenSlots[idx].cooking = true; renderOvenSlot(idx); 
+            cookingRegistry.oven[idx+1] = true;
+            
+            runProgressBar(`prog-wrap-oven-${idx+1}`, 4000);
+            
+            setTimeout(() => {
+                cookingRegistry.oven[idx+1] = false; 
+                ovenSlots[idx].cooking = false; 
+                ovenSlots[idx].done = true;
+                
+                let wrap = document.getElementById(`prog-wrap-oven-${idx+1}`);
+                if(wrap) wrap.style.display = 'none';
+
+                let sPlateIdx = pizzaServingPlates.findIndex(s => s === 0);
+                if (sPlateIdx !== -1) { pizzaServingPlates[sPlateIdx] = 1; ovenSlots[idx] = { bread: false, oni: false, sau: false, cooking: false, done: false }; renderServingPizza(sPlateIdx); }
+                renderOvenSlot(idx);
+            }, 4000);
+        }
+
+        function manualMovePizza(num) {
+            if(!isPlaying) return;
+            let idx = num - 1;
+            if (ovenSlots[idx].done) {
+                let sPlateIdx = pizzaServingPlates.findIndex(s => s === 0);
+                if (sPlateIdx !== -1) { pizzaServingPlates[sPlateIdx] = 1; ovenSlots[idx] = { bread: false, oni: false, sau: false, cooking: false, done: false }; renderServingPizza(sPlateIdx); renderOvenSlot(idx); } else { shakeEl(document.getElementById(`oven-slot-${num}`)); }
+            } else if (!isEmptyPizza(ovenSlots[idx]) && !ovenSlots[idx].cooking) { shakeEl(document.getElementById(`oven-slot-${num}`)); }
+        }
+
+        function renderServingPizza(idx) {
+            let el = document.getElementById(`plate-saji-pizza-${idx+1}`);
+            if (pizzaServingPlates[idx] === 1) { 
+                el.innerHTML = '<div style="font-size: 35px;">🍕</div>'; 
+                el.setAttribute('data-food', '🍕');
+                popEl(el); 
+            } else { 
+                el.innerHTML = ''; 
+                el.removeAttribute('data-food');
+            }
+        }
+
+        // Sajikan pizza ke piring saji utama
+        function servePizza(num) {
+            let idx = num - 1;
+            if (pizzaServingPlates[idx] === 1) {
+                let el = document.getElementById(`plate-saji-pizza-${num}`);
+                selectFood('🍕', el, () => {
+                    pizzaServingPlates[idx] = 0; renderServingPizza(idx);
+                    let stuckOvenIdx = ovenSlots.findIndex(p => p.done);
+                    if (stuckOvenIdx !== -1) { pizzaServingPlates[idx] = 1; ovenSlots[stuckOvenIdx] = { bread: false, oni: false, sau: false, cooking: false, done: false }; renderServingPizza(idx); renderOvenSlot(stuckOvenIdx); }
+                });
+            }
+        }
+
+        function selectFood(icon, el, cb) {
+            if(!isPlaying) return;
+            if(el.getAttribute('data-food') !== icon) { shakeEl(el); return; }
+            
+            let idx = customers.findIndex(c => c && c.menu.icon === icon);
+            if(idx !== -1) {
+                money += customers[idx].menu.price; 
+                document.getElementById('money-display').innerText = `💵 ${money}`;
+                if(cb) { cb(); } else { el.innerHTML = ''; el.removeAttribute('data-food'); }
+                removeCustomer(idx);
+            } else { shakeEl(el); }
+        }
+
+        function restartGame() {
+            timeRemaining = DURATION; money = 0; isPlaying = true;
+            document.getElementById('money-display').innerText = `💵 0`; document.getElementById('game-over').style.display = 'none'; document.getElementById('timer-bar-fill').style.background = 'linear-gradient(90deg, #2ecc71, #27ae60)';
+            
+            document.querySelectorAll('.plate-c, .plate-s, .internal-slot').forEach(el => { 
+                el.innerHTML = ''; el.removeAttribute('data-food');
+                if(el.classList.contains('internal-slot')) el.setAttribute('data-state', 'empty'); 
+            });
+            document.querySelectorAll('.prog-bar').forEach(el => el.style.display = 'none');
+            
+            cookingRegistry = {
+                fries: { 1: false, 2: false },
+                chicken: { 1: false, 2: false },
+                grill: { 1: false, 2: false, 3: false, 4: false },
+                oven: { 1: false, 2: false, 3: false, 4: false }
+            };
+
+            initPlates();
+            for(let i=0; i<4; i++) { renderBurgerPlate(i); renderOvenSlot(i); renderServingPizza(i); }
+            customers.forEach((c,i) => removeCustomer(i));
+            
+            clearInterval(timerInt); clearInterval(spawnInt);
+            
+            timerInt = setInterval(() => {
+                timeRemaining--; let pct = (timeRemaining/DURATION)*100; document.getElementById('timer-bar-fill').style.width = pct+'%';
+                if(timeRemaining <= 0) { isPlaying = false; clearInterval(timerInt); clearInterval(spawnInt); document.getElementById('final-score').innerText = `Pendapatan Akhir: 💵 ${money}`; document.getElementById('game-over').style.display = 'flex'; }
+            }, 1000);
+            
+            spawnInt = setInterval(spawnCustomer, 3500); spawnCustomer();
+        }
+        
+        initPlates(); restartGame();
+    </script>
+</body>
+</html>
