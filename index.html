@@ -504,17 +504,15 @@
         function pressEl(el) { if(!el) return; el.style.transform = 'scale(0.9)'; setTimeout(() => { el.style.transform = ''; }, 100); }
 
         function handleMachineClick(type, icon, t, wrapperEl) {
-            // 1. CARI APAKAH ADA CUSTOMER YANG MAU PESANAN INI
             let custIdx = customers.findIndex(c => c && c.menu.icon === icon);
             
-            // 2. CARI APAKAH ADA MAKANAN YANG SUDAH JADI (READY)
             let readySlotIdx = -1;
             for(let i=1; i<=3; i++) { 
                 let slot = document.getElementById(`plate-${type}-${i}`); 
                 if(slot && slot.getAttribute('data-state') === 'ready') { readySlotIdx = i; break; } 
             }
 
-            // 3. PRIORITAS PERTAMA: SAJIKAN MAKANAN JIKA ADA CUSTOMER & MAKANAN READY
+            // PRIORITAS 1: Jika pelanggan ada, makanan jadi, dan toko buka -> SAJIKAN MAKANAN
             if(custIdx !== -1 && readySlotIdx !== -1 && isShopOpen) {
                 pressEl(wrapperEl);
                 tabungan += customers[custIdx].menu.price; 
@@ -525,10 +523,10 @@
                 slot.removeAttribute('data-food'); 
                 slot.setAttribute('data-state', 'empty');
                 removeCustomer(custIdx);
-                return; // Selesai, jangan lanjut cek stok ke bawah!
+                return; 
             }
 
-            // 4. JIKA TIDAK ADA YANG BISA DISAJIKAN, BERARTI MAU MASAK BARU. CEK STOK DULU!
+            // PRIORITAS 2: Jika stok habis -> PAKSA BELANJA DULU
             if(stock[type] <= 0) { 
                 shakeEl(wrapperEl); 
                 document.getElementById('shop-panel').classList.add('open'); 
@@ -536,7 +534,7 @@
                 return; 
             } 
 
-            // 5. CARI SLOT KOSONG UNTUK MASAK
+            // PRIORITAS 3: MASAK BARU
             let emptySlotIdx = -1;
             for(let i=1; i<=3; i++) { 
                 let slot = document.getElementById(`plate-${type}-${i}`); 
@@ -545,7 +543,6 @@
 
             if(emptySlotIdx === -1) { shakeEl(wrapperEl); return; } // Slot penuh
             
-            // 6. MULAI MASAK
             stock[type]--; 
             updateUangDanStok();
             pressEl(wrapperEl);
@@ -713,7 +710,6 @@
         }
 
         function selectFood(icon, el, cb) {
-            // Bisa jualan cuma kalau toko BUKA
             if(!isShopOpen) { shakeEl(document.getElementById('shop-status-btn')); return; } 
             if(el.getAttribute('data-food') !== icon) { shakeEl(el); return; }
             
@@ -731,9 +727,18 @@
         initPlates();
         updateUangDanStok();
         
-        // Mulai dengan kondisi Toko Tutup & Panel Terbuka agar pemain bisa belanja dulu
         document.getElementById('shop-panel').classList.add('open');
         renderShop();
+
+        // --- SISTEM ANTI CHEAT (KLIK KANAN & SHORTCUT F12) ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) { return false; }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; }
+        };
+
     </script>
 </body>
 </html>
