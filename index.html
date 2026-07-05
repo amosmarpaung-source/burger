@@ -13,14 +13,12 @@
             -webkit-touch-callout: none; 
             user-select: none; -webkit-user-select: none;
             box-sizing: border-box; 
-            /* FIX IOS: Mencegah iOS mengira tap sebagai gestur scroll/zoom sehingga klik instan */
             touch-action: none;
         }
         
         body, html {
             margin: 0; padding: 0; width: 100vw; 
             height: 100vh; height: 100dvh; 
-            /* FIX IOS: Kompatibilitas untuk versi iOS lama */
             min-height: -webkit-fill-available;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             display: flex; justify-content: center; align-items: center; 
@@ -67,20 +65,25 @@
         .order-item-icon { font-size: 38px; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2)); }
         .order-price { font-size: 16px; color: #1e90ff; background: #f1f2f6; padding: 2px 10px; border-radius: 8px; font-weight: 900;}
 
-        /* --- AREA DAPUR --- */
+        /* --- AREA DAPUR (FULL iOS FIX) --- */
         .kitchen-area { height: 65%; display: grid; grid-template-columns: 0.8fr 0.5fr 2fr 1.6fr 1.1fr; background: #1e272e; border-top: 10px solid #1e272e; }
-        .col { border-right: 5px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; }
+        
+        /* FIX iOS 1: Memastikan kolom mengambil 100% ruang yang tersedia dari Grid */
+        .col { border-right: 5px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; height: 100%; width: 100%; min-height: 0; }
         .col:last-child { border-right: none; }
         
+        /* FIX iOS 2: Menggunakan flex-basis eksplisit (0%) dan tinggi cadangan agar Safari tidak menelan porsi layout */
         .area-top { 
-            flex: 1.3; background-color: #576574; background-image: url('./dinding_kayu.jpg'); 
+            flex: 1.3 1 0%; height: 55%; width: 100%; min-height: 0;
+            background-color: #576574; background-image: url('./dinding_kayu.jpg'); 
             background-size: cover; background-position: center bottom;
             display: flex; justify-content: center; align-items: center; padding: 10px; position: relative; 
             box-shadow: inset 0 -15px 20px rgba(0,0,0,0.5); 
         }
         
         .area-bottom { 
-            flex: 1; background-color: #222f3e; background-image: url('./meja.jpg'); 
+            flex: 1 1 0%; height: 45%; width: 100%; min-height: 0;
+            background-color: #222f3e; background-image: url('./meja.jpg'); 
             background-size: cover; background-position: center top;
             display: flex; justify-content: center; align-items: center; 
             padding: 10px; padding-bottom: 28px; 
@@ -90,12 +93,13 @@
 
         /* --- KOMPONEN UI UMUM --- */
         .plate-c *, .plate-s *, .bin-btn *, .mini-btn * { pointer-events: none; }
-        .plate-c, .plate-s { background: #f1f2f6; box-shadow: 0 6px 0 #c8d6e5, inset 0 -4px 5px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: filter 0.1s, transform 0.1s; border: 2px solid #fff; position: relative;}
+        /* FIX iOS 3: Menambahkan flex-shrink: 0 agar ukuran div piring dan tombol tidak menciut ke 0 */
+        .plate-c, .plate-s { flex-shrink: 0; background: #f1f2f6; box-shadow: 0 6px 0 #c8d6e5, inset 0 -4px 5px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: filter 0.1s, transform 0.1s; border: 2px solid #fff; position: relative;}
         .plate-c { width: 55px; height: 55px; border-radius: 50%; font-size: 32px;}
         .plate-s { width: 50px; height: 50px; border-radius: 10px; font-size: 30px;}
         
-        .bin-btn { border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 35px; cursor: pointer; position: relative; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 8px 0 rgba(0,0,0,0.3); transition: filter 0.1s, transform 0.1s;}
-        .mini-btn { width: 50px; height: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 0 #bdc3c7; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; transition: filter 0.1s, transform 0.1s;}
+        .bin-btn { flex-shrink: 0; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 35px; cursor: pointer; position: relative; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 8px 0 rgba(0,0,0,0.3); transition: filter 0.1s, transform 0.1s;}
+        .mini-btn { flex-shrink: 0; width: 50px; height: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 0 #bdc3c7; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; transition: filter 0.1s, transform 0.1s;}
         
         .bin-btn:active, .plate-c:active, .plate-s:active, .mini-btn:active { filter: brightness(0.75); transform: scale(0.9); }
 
@@ -106,30 +110,24 @@
 
         /* --- TATA LETAK MESIN --- */
         .machine-container-slot {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
+            flex: 1 1 0%; height: 50%; width: 100%; min-height: 0;
+            display: flex; justify-content: center; align-items: center; position: relative;
         }
 
         .machine-wrapper { 
             position: relative; cursor: pointer; display: flex; flex-direction: column; 
             align-items: center; justify-content: center; width: 90%; height: 90%; z-index: 20;
-            transition: filter 0.1s, transform 0.1s;
+            transition: filter 0.1s, transform 0.1s; flex-shrink: 0;
         }
         .machine-wrapper * { pointer-events: none; }
         .machine-wrapper:active { filter: brightness(0.85); transform: scale(0.97); }
         
-        .machine-img { 
-            width: auto; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain;
-        }
+        .machine-img { width: auto; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
         .machine-working .machine-img { animation: machinePump 0.4s infinite alternate ease-in-out; filter: brightness(1.2); }
         @keyframes machinePump { 0% {transform: translateY(0) scaleY(1);} 100% {transform: translateY(2px) scaleY(0.97);} }
 
         .machine-tray { position: absolute; bottom: 8px; left: 0; width: 100%; display: flex; justify-content: center; gap: 6px; z-index: 25; }
-        .internal-slot { width: 32px; height: 40px; display: flex; justify-content: center; align-items: flex-end; position: relative; }
+        .internal-slot { flex-shrink: 0; width: 32px; height: 40px; display: flex; justify-content: center; align-items: flex-end; position: relative; }
 
         /* --- EFEK ANIMASI MENUANG --- */
         .craft-wrap { display: flex; flex-direction: column; align-items: center; position: relative; width: 100%; height: 100%;}
@@ -231,13 +229,14 @@
 
                 <div class="col">
                     <div class="area-top" style="gap: 20px; justify-content: center;">
-                        <div style="background: rgba(45, 52, 54, 0.7); border: 3px solid #57606f; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);">
+                        <!-- FIX iOS: Penambahan flex-shrink: 0 pada pembungkus -->
+                        <div style="flex-shrink: 0; background: rgba(45, 52, 54, 0.7); border: 3px solid #57606f; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);">
                             <div class="mini-btn" style="background: transparent; box-shadow: none;" onclick="addPizzaIng('🧅', this)">
                                 <img src="./bawang.png" onerror="this.outerHTML='🧅'" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.4));" alt="Bawang">
                             </div>
                             <div class="mini-btn" style="background: #ffb142;" onclick="addPizzaIng('🌭', this)">🌭</div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div style="flex-shrink: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <div class="plate-c" id="plate-saji-pizza-1" onclick="servePizza(1)"></div>
                             <div class="plate-c" id="plate-saji-pizza-2" onclick="servePizza(2)"></div>
                             <div class="plate-c" id="plate-saji-pizza-3" onclick="servePizza(3)"></div>
@@ -248,13 +247,13 @@
                         <div class="bin-btn" style="background: #fbc531; width: 70px; height: 80px;" onclick="addPizzaIng('🍞', this)">
                             <div style="font-size: 30px;">🍞</div>
                         </div>
-                        <div style="background: #130f40; width: 180px; height: 120px; border-radius: 15px; border: 5px solid #30336b; display: flex; flex-direction: column; align-items: center; padding: 12px; padding-top: 18px; box-sizing: border-box; position: relative; box-shadow: inset 0 15px 20px rgba(0,0,0,0.8);">
+                        <div style="flex-shrink: 0; background: #130f40; width: 180px; height: 120px; border-radius: 15px; border: 5px solid #30336b; display: flex; flex-direction: column; align-items: center; padding: 12px; padding-top: 18px; box-sizing: border-box; position: relative; box-shadow: inset 0 15px 20px rgba(0,0,0,0.8);">
                             <div style="position: absolute; top: -12px; background: #30336b; color: white; padding: 2px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; border: 2px solid #130f40;">OVEN SLOT</div>
                             <div style="width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; z-index: 2;">
-                                <div id="oven-slot-1" onclick="manualMovePizza(1)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-1" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-1"></div></div>
-                                <div id="oven-slot-2" onclick="manualMovePizza(2)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-2" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-2"></div></div>
-                                <div id="oven-slot-3" onclick="manualMovePizza(3)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-3" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-3"></div></div>
-                                <div id="oven-slot-4" onclick="manualMovePizza(4)" style="background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-4" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-4"></div></div>
+                                <div id="oven-slot-1" onclick="manualMovePizza(1)" style="flex-shrink: 0; background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-1" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-1"></div></div>
+                                <div id="oven-slot-2" onclick="manualMovePizza(2)" style="flex-shrink: 0; background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-2" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-2"></div></div>
+                                <div id="oven-slot-3" onclick="manualMovePizza(3)" style="flex-shrink: 0; background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-3" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-3"></div></div>
+                                <div id="oven-slot-4" onclick="manualMovePizza(4)" style="flex-shrink: 0; background: rgba(255,255,255,0.1); border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer;"><div id="oven-content-4" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;"></div><div class="prog-bar" id="prog-wrap-oven-4"></div></div>
                             </div>
                         </div>
                     </div>
@@ -262,13 +261,13 @@
 
                 <div class="col">
                     <div class="area-top" style="display: flex; gap: 15px; justify-content: center;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div style="flex-shrink: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <div class="plate-c" id="plate-burger-1" onclick="serveBurger(1)" style="flex-direction: column-reverse; font-size: 20px;"></div>
                             <div class="plate-c" id="plate-burger-2" onclick="serveBurger(2)" style="flex-direction: column-reverse; font-size: 20px;"></div>
                             <div class="plate-c" id="plate-burger-3" onclick="serveBurger(3)" style="flex-direction: column-reverse; font-size: 20px;"></div>
                             <div class="plate-c" id="plate-burger-4" onclick="serveBurger(4)" style="flex-direction: column-reverse; font-size: 20px;"></div>
                         </div>
-                        <div style="background: rgba(241, 242, 246, 0.8); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);">
+                        <div style="flex-shrink: 0; background: rgba(241, 242, 246, 0.8); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);">
                             <div class="mini-btn" style="background:#7bed9f;" onclick="addBurgerIng('🥬', this)">🥬</div>
                             <div class="mini-btn" style="background:#ff6b81;" onclick="addBurgerIng('🍅', this)">🍅</div>
                         </div>
@@ -285,7 +284,7 @@
 
                 <div class="col">
                     <div class="area-top">
-                        <div style="background: rgba(45, 52, 54, 0.8); border: 5px solid #1e272e; border-radius: 15px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);">
+                        <div style="flex-shrink: 0; background: rgba(45, 52, 54, 0.8); border: 5px solid #1e272e; border-radius: 15px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);">
                             <div style="position: relative;"><div class="plate-c" id="plate-grill-1" onclick="moveMeatToBurger(this)" style="background: #1e272e; border: none; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); width: 55px; height: 55px; font-size: 35px;"></div><div class="prog-bar" id="prog-wrap-grill-1"></div></div>
                             <div style="position: relative;"><div class="plate-c" id="plate-grill-2" onclick="moveMeatToBurger(this)" style="background: #1e272e; border: none; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); width: 55px; height: 55px; font-size: 35px;"></div><div class="prog-bar" id="prog-wrap-grill-2"></div></div>
                             <div style="position: relative;"><div class="plate-c" id="plate-grill-3" onclick="moveMeatToBurger(this)" style="background: #1e272e; border: none; box-shadow: inset 0 5px 10px rgba(0,0,0,0.8); width: 55px; height: 55px; font-size: 35px;"></div><div class="prog-bar" id="prog-wrap-grill-3"></div></div>
@@ -312,8 +311,6 @@
         }
         
         window.addEventListener('resize', updateScale);
-        
-        /* FIX IOS: Safari membutuhkan waktu jeda untuk membaca ukuran layar sebenarnya saat diputar */
         window.addEventListener('orientationchange', () => {
             setTimeout(updateScale, 150);
             setTimeout(updateScale, 400); 
@@ -324,7 +321,6 @@
         const DURATION = 90;
         let timeRemaining = DURATION, money = 0, isPlaying = false, timerInt, spawnInt;
         
-        // FIX KUNCI: Menyelaraskan ikon menu dengan fungsi penangan klik agar data tidak bentrok
         const MENU = [
             { icon: '☕', price: 15 }, { icon: '🍦', price: 25 },
             { icon: '🍟', price: 20 }, { icon: '🍗', price: 35 },
@@ -568,7 +564,6 @@
             for(let i=0; i<4; i++) { if (isEmptyPizza(ovenSlots[i])) return i; } return -1;
         }
 
-        /* --- FIX FIX: PERBAIKAN LOGIKA TEMPLATE LITERAL OVEN --- */
         function addPizzaIng(ing, btn) {
             if(!isPlaying) return;
             let idx = findPizzaSlot(ing);
@@ -579,7 +574,6 @@
             if (ing === '🍞') p.bread = true; else if (ing === '🧅') p.oni = true; else if (ing === '🌭') p.sau = true;
             renderOvenSlot(idx);
             
-            // FIX: Menggunakan template literal yang dijamin tereksekusi tanpa crash
             let el = document.getElementById(`oven-content-${idx+1}`);
             if(el) popEl(el);
             
@@ -641,7 +635,6 @@
             }
         }
 
-        // Sajikan pizza ke piring saji utama
         function servePizza(num) {
             let idx = num - 1;
             if (pizzaServingPlates[idx] === 1) {
@@ -698,7 +691,6 @@
             spawnInt = setInterval(spawnCustomer, 3500); spawnCustomer();
         }
         
-        /* FIX IOS: Daftarkan global listener ringan agar state ':active' dan 'onclick' di Safari iPhone berfungsi dengan sempurna tanpa harus double tap */
         document.addEventListener('touchstart', function() {}, {passive: true});
 
         initPlates(); restartGame();
