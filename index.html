@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Game Masak - Perfect Responsive Version</title>
+    <title>Game Masak - Simulasi Merintis Bisnis</title>
     <style>
         /* --- RESET & OPTIMASI KHUSUS IPHONE, ANDROID, & PC --- */
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
@@ -45,12 +45,22 @@
         .aquarium::after { content: ''; position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle at 15% 40%, rgba(255,255,255,0.15) 6px, transparent 8px), radial-gradient(circle at 80% 60%, rgba(255,255,255,0.15) 4px, transparent 6px); }
 
         /* --- TOP BAR --- */
-        .top-bar { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 10; align-items: center; }
-        .timer-wrapper { background: #eccc68; border: 4px solid #c8d6e5; border-radius: 25px; padding: 5px 15px 5px 45px; position: relative; box-shadow: 0 6px 0 rgba(0,0,0,0.2); width: 300px; height: 25px; display: flex; align-items: center; }
-        .timer-icon { position: absolute; left: 5px; top: 0px; font-size: 26px; }
-        .timer-bar { width: 100%; height: 16px; background: #2f3640; border-radius: 10px; overflow: hidden; }
-        .timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); transition: width 1s linear;}
-        .cash-register { background: #2ed573; border: 4px solid #ffffff; padding: 8px 25px; border-radius: 20px; font-size: 24px; color: white; text-shadow: 2px 2px 0 #2f3542; box-shadow: 0 6px 0 rgba(0,0,0,0.2); font-weight: 900; }
+        .top-bar { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; z-index: 10; align-items: center; }
+        
+        .cash-register { background: #2ed573; border: 4px solid #ffffff; padding: 8px 25px; border-radius: 20px; font-size: 24px; color: white; text-shadow: 2px 2px 0 #2f3542; box-shadow: 0 6px 0 rgba(0,0,0,0.2); font-weight: 900; min-width: 150px; text-align: center;}
+        
+        /* TOMBOL TOKO (SHOP) & STATUS */
+        .shop-toggle-btn { background: #9b59b6; border: 4px solid #8e44ad; padding: 8px 20px; border-radius: 20px; font-size: 20px; color: white; font-weight: 900; text-shadow: 2px 2px 0 #2c3e50; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2); transition: transform 0.1s; display: flex; align-items: center; gap: 8px;}
+        .shop-toggle-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+
+        .status-btn {
+            background: #27ae60; border: 4px solid #ffffff; padding: 8px 30px; border-radius: 20px; 
+            font-size: 24px; color: white; font-weight: 900; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); 
+            cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2); transition: all 0.1s;
+            display: flex; align-items: center; justify-content: center; min-width: 250px;
+        }
+        .status-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+        .status-closed { background: #e74c3c !important; border-color: #c0392b !important; }
 
         /* --- AREA PELANGGAN --- */
         .customer-area { height: 35%; display: flex; justify-content: center; align-items: flex-end; gap: 40px; z-index: 5; padding-bottom: 0px; }
@@ -65,14 +75,11 @@
         .order-item-icon { font-size: 38px; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2)); }
         .order-price { font-size: 16px; color: #1e90ff; background: #f1f2f6; padding: 2px 10px; border-radius: 8px; font-weight: 900;}
 
-        /* --- AREA DAPUR (FULL iOS FIX) --- */
+        /* --- AREA DAPUR --- */
         .kitchen-area { height: 65%; display: grid; grid-template-columns: 0.8fr 0.5fr 2fr 1.6fr 1.1fr; background: #1e272e; border-top: 10px solid #1e272e; }
-        
-        /* FIX iOS 1: Memastikan kolom mengambil 100% ruang yang tersedia dari Grid */
         .col { border-right: 5px solid rgba(0,0,0,0.5); display: flex; flex-direction: column; height: 100%; width: 100%; min-height: 0; }
         .col:last-child { border-right: none; }
         
-        /* FIX iOS 2: Menggunakan flex-basis eksplisit (0%) dan tinggi cadangan agar Safari tidak menelan porsi layout */
         .area-top { 
             flex: 1.3 1 0%; height: 55%; width: 100%; min-height: 0;
             background-color: #576574; background-image: url('./dinding_kayu.jpg'); 
@@ -86,22 +93,28 @@
             background-color: #222f3e; background-image: url('./meja.jpg'); 
             background-size: cover; background-position: center top;
             display: flex; justify-content: center; align-items: center; 
-            padding: 10px; padding-bottom: 28px; 
-            position: relative; 
+            padding: 10px; padding-bottom: 28px; position: relative; 
             box-shadow: inset 0 10px 15px rgba(0,0,0,0.4); 
         }
 
-        /* --- KOMPONEN UI UMUM --- */
+        /* --- KOMPONEN UI UMUM & BADGE STOK --- */
         .plate-c *, .plate-s *, .bin-btn *, .mini-btn * { pointer-events: none; }
-        /* FIX iOS 3: Menambahkan flex-shrink: 0 agar ukuran div piring dan tombol tidak menciut ke 0 */
         .plate-c, .plate-s { flex-shrink: 0; background: #f1f2f6; box-shadow: 0 6px 0 #c8d6e5, inset 0 -4px 5px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: filter 0.1s, transform 0.1s; border: 2px solid #fff; position: relative;}
         .plate-c { width: 55px; height: 55px; border-radius: 50%; font-size: 32px;}
         .plate-s { width: 50px; height: 50px; border-radius: 10px; font-size: 30px;}
         
         .bin-btn { flex-shrink: 0; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 35px; cursor: pointer; position: relative; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 8px 0 rgba(0,0,0,0.3); transition: filter 0.1s, transform 0.1s;}
-        .mini-btn { flex-shrink: 0; width: 50px; height: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 0 #bdc3c7; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; transition: filter 0.1s, transform 0.1s;}
+        .mini-btn { flex-shrink: 0; width: 50px; height: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 0 #bdc3c7; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; transition: filter 0.1s, transform 0.1s; position: relative;}
         
         .bin-btn:active, .plate-c:active, .plate-s:active, .mini-btn:active { filter: brightness(0.75); transform: scale(0.9); }
+
+        .stock-badge {
+            position: absolute; top: -10px; right: -10px;
+            background: #e74c3c; color: white; font-size: 14px;
+            font-weight: 900; padding: 2px 8px; border-radius: 12px;
+            border: 3px solid white; z-index: 30; pointer-events: none;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.4);
+        }
 
         /* LOADING BAR CSS */
         .prog-bar { position: absolute; bottom: -18px; left: -10%; width: 120%; height: 14px; background: #2f3640; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.7); overflow: hidden; display: none; z-index: 50; pointer-events: none;}
@@ -109,33 +122,21 @@
         @keyframes runLoadingBar { 0% { width: 0%; background: #e74c3c; } 50% { background: #f1c40f; } 100% { width: 100%; background: #2ecc71; } }
 
         /* --- TATA LETAK MESIN --- */
-        .machine-container-slot {
-            flex: 1 1 0%; height: 50%; width: 100%; min-height: 0;
-            display: flex; justify-content: center; align-items: center; position: relative;
-        }
-
-        .machine-wrapper { 
-            position: relative; cursor: pointer; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; width: 90%; height: 90%; z-index: 20;
-            transition: filter 0.1s, transform 0.1s; flex-shrink: 0;
-        }
+        .machine-container-slot { flex: 1 1 0%; height: 50%; width: 100%; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; }
+        .machine-wrapper { position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90%; height: 90%; z-index: 20; transition: filter 0.1s, transform 0.1s; flex-shrink: 0; }
         .machine-wrapper * { pointer-events: none; }
         .machine-wrapper:active { filter: brightness(0.85); transform: scale(0.97); }
-        
         .machine-img { width: auto; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
         .machine-working .machine-img { animation: machinePump 0.4s infinite alternate ease-in-out; filter: brightness(1.2); }
         @keyframes machinePump { 0% {transform: translateY(0) scaleY(1);} 100% {transform: translateY(2px) scaleY(0.97);} }
-
         .machine-tray { position: absolute; bottom: 8px; left: 0; width: 100%; display: flex; justify-content: center; gap: 6px; z-index: 25; }
         .internal-slot { flex-shrink: 0; width: 32px; height: 40px; display: flex; justify-content: center; align-items: flex-end; position: relative; }
 
         /* --- EFEK ANIMASI MENUANG --- */
         .craft-wrap { display: flex; flex-direction: column; align-items: center; position: relative; width: 100%; height: 100%;}
         .craft-stream { position: absolute; top: -50px; opacity: 0; z-index: 1; border-radius: 4px; }
-        
         .stream-d { width: 6px; background: #e1b12c; animation-name: streamFall; animation-fill-mode: forwards; animation-timing-function: ease-in; } 
         .stream-ic { width: 12px; background: #fd79a8; animation-name: streamFall; animation-fill-mode: forwards; animation-timing-function: ease-in; }
-
         .craft-cup { width: 22px; height: 30px; border: 2px solid rgba(255,255,255,0.8); border-top: none; border-radius: 0 0 5px 5px; position: absolute; bottom: 0; overflow: hidden; background: rgba(0,0,0,0.4); opacity: 0; animation: popIn 0.2s forwards; }
         .craft-cone { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 25px solid #e1b12c; border-radius: 4px; opacity: 0; animation: popIn 0.2s forwards; position: absolute; bottom: 0; z-index: 1;}
         .craft-liquid { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #e1b12c; animation-name: fillUp; animation-fill-mode: forwards; animation-timing-function: linear;} 
@@ -149,11 +150,30 @@
         .ready-food { font-size: 38px; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.8)); position: absolute; bottom: 0; pointer-events: none;}
 
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-        .shake { animation: shake 0.2s ease-in-out 2; }
+        .shake { animation: shake 0.2s ease-in-out 2; border-color: red !important; }
         .food-pop { animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes pop { 0% {transform: scale(0.5);} 100% {transform: scale(1);} }
 
-        #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; color: white;}
+        /* --- PANEL TOKO (SHOP) --- */
+        #shop-panel {
+            position: absolute; top: 0; left: -100%; width: 420px; height: 100%;
+            background: rgba(45, 52, 54, 0.95); z-index: 200;
+            transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-right: 8px solid #9b59b6; display: flex; flex-direction: column;
+            padding: 20px; box-shadow: 15px 0 30px rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+        }
+        #shop-panel.open { left: 0; }
+        .shop-header { color: white; font-size: 24px; font-weight: 900; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .shop-close { background: #e74c3c; border: 3px solid #c0392b; color: white; border-radius: 8px; width: 40px; height: 40px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #900000; }
+        .shop-close:active { transform: translateY(4px); box-shadow: none; }
+        .shop-items-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 10px; }
+        .shop-items-container::-webkit-scrollbar { width: 8px; }
+        .shop-items-container::-webkit-scrollbar-thumb { background: #9b59b6; border-radius: 4px; }
+        .s-item { background: #34495e; padding: 12px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 2px solid #2c3e50; color: white; box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);}
+        .s-item button { background: #2ecc71; border: 2px solid #27ae60; padding: 10px 15px; border-radius: 8px; color: white; font-weight: 900; font-size: 16px; box-shadow: 0 4px 0 #219653; cursor: pointer; transition: transform 0.1s;}
+        .s-item button:active { transform: translateY(4px); box-shadow: none; }
+
     </style>
 </head>
 <body>
@@ -167,15 +187,24 @@
         <div id="game-board">
             <div class="aquarium"></div>
 
-            <div id="game-over">
-                <h1>MASA TAMAT!</h1>
-                <h2 id="final-score">Pendapatan: 💵 0</h2>
-                <button style="background: #0984e3; color: white; padding: 20px 50px; font-size: 30px; border-radius: 40px; cursor: pointer; border: 6px solid #fff; font-weight: 900; box-shadow: 0 10px 0 #0652dd; margin-top: 20px;" onclick="restartGame()">MAIN LAGI</button>
+            <!-- Panel Toko Bergeser -->
+            <div id="shop-panel">
+                <div class="shop-header">
+                    <span>🛒 Toko Bahan Baku</span>
+                    <button class="shop-close" id="shop-close-btn" onclick="toggleShop()">X</button>
+                </div>
+                <div class="shop-items-container" id="shop-items-list">
+                    <!-- Item toko dirender oleh JS -->
+                </div>
             </div>
 
             <div class="top-bar">
-                <div class="timer-wrapper"><span class="timer-icon">⏰</span><div class="timer-bar"><div class="timer-fill" id="timer-bar-fill"></div></div></div>
-                <div class="cash-register" id="money-display">💵 0</div>
+                <div class="shop-toggle-btn" onclick="toggleShop()">🛒 Toko</div>
+                
+                <!-- TOMBOL BUKA/TUTUP TOKO -->
+                <div id="shop-status-btn" class="status-btn status-closed" onclick="toggleShopStatus()">🔴 TUTUP TOKO</div>
+                
+                <div class="cash-register" id="money-display">💵 150</div>
             </div>
 
             <div class="customer-area" id="customers">
@@ -190,6 +219,7 @@
                     
                     <div class="machine-container-slot" style="border-bottom: 3px solid rgba(0,0,0,0.3);">
                         <div class="machine-wrapper" id="machine-drink-wrap" onclick="handleMachineClick('drink', '☕', 1500, this)">
+                            <div class="stock-badge" id="badge-drink">0</div>
                             <img src="./mesin kopi.png.webp" onerror="this.src='https://via.placeholder.com/150x200/e74c3c/fff?text=Mesin+Air'" class="machine-img" style="border: none; background: transparent; box-shadow: none;" alt="Mesin Kopi 3D">
                             <div class="machine-tray">
                                 <div class="internal-slot" id="plate-drink-1" data-state="empty"></div>
@@ -201,6 +231,7 @@
 
                     <div class="machine-container-slot">
                         <div class="machine-wrapper" id="machine-icecream-wrap" onclick="handleMachineClick('icecream', '🍦', 1500, this)">
+                            <div class="stock-badge" id="badge-icecream">0</div>
                             <img src="./WhatsApp Image 2026-06-18 at 13.16.36.jpeg" onerror="this.src='https://via.placeholder.com/150x200/f39c12/fff?text=Mesin+Es'" class="machine-img" style="border-radius: 12px; border: 3px solid #1e272e; box-shadow: 0 8px 12px rgba(0,0,0,0.6);" alt="Mesin Es Krim">
                             <div class="machine-tray">
                                 <div class="internal-slot" id="plate-icecream-1" data-state="empty"></div>
@@ -221,15 +252,20 @@
                     </div>
                     <div class="area-bottom" style="gap: 15px;">
                         <div style="display: flex; gap: 10px;">
-                            <div class="bin-btn" style="background: #f1c40f; border-color: #f39c12; width: 60px; height: 80px;" onclick="cookIndependent('fries', '🍟', 2000, 2, this)"><div style="font-size: 28px;">🍟</div></div>
-                            <div class="bin-btn" style="background: #e67e22; border-color: #d35400; width: 60px; height: 80px;" onclick="cookIndependent('chicken', '🍗', 3000, 2, this)"><div style="font-size: 28px;">🍗</div></div>
+                            <div class="bin-btn" style="background: #f1c40f; border-color: #f39c12; width: 60px; height: 80px;" onclick="cookIndependent('fries', '🍟', 2000, 2, this)">
+                                <div class="stock-badge" id="badge-fries">0</div>
+                                <div style="font-size: 28px;">🍟</div>
+                            </div>
+                            <div class="bin-btn" style="background: #e67e22; border-color: #d35400; width: 60px; height: 80px;" onclick="cookIndependent('chicken', '🍗', 3000, 2, this)">
+                                <div class="stock-badge" id="badge-chicken">0</div>
+                                <div style="font-size: 28px;">🍗</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col">
                     <div class="area-top" style="gap: 20px; justify-content: center;">
-                        <!-- FIX iOS: Penambahan flex-shrink: 0 pada pembungkus -->
                         <div style="flex-shrink: 0; background: rgba(45, 52, 54, 0.7); border: 3px solid #57606f; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);">
                             <div class="mini-btn" style="background: transparent; box-shadow: none;" onclick="addPizzaIng('🧅', this)">
                                 <img src="./bawang.png" onerror="this.outerHTML='🧅'" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.4));" alt="Bawang">
@@ -245,6 +281,7 @@
                     </div>
                     <div class="area-bottom" style="gap: 15px;">
                         <div class="bin-btn" style="background: #fbc531; width: 70px; height: 80px;" onclick="addPizzaIng('🍞', this)">
+                            <div class="stock-badge" id="badge-pizzabase">0</div>
                             <div style="font-size: 30px;">🍞</div>
                         </div>
                         <div style="flex-shrink: 0; background: #130f40; width: 180px; height: 120px; border-radius: 15px; border: 5px solid #30336b; display: flex; flex-direction: column; align-items: center; padding: 12px; padding-top: 18px; box-sizing: border-box; position: relative; box-shadow: inset 0 15px 20px rgba(0,0,0,0.8);">
@@ -274,6 +311,7 @@
                     </div>
                     <div class="area-bottom">
                         <div class="bin-btn" style="background: #f39c12; width: 110px; height: 90px; border-radius: 10px; border: 3px solid #ffbe76;" onclick="addBurgerIng('🍞', this)">
+                            <div class="stock-badge" id="badge-burgerbun">0</div>
                             <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:2px; margin-top: -10px;">
                                 <span style="font-size:25px;">🍞</span><span style="font-size:25px;">🍞</span>
                                 <span style="font-size:25px;">🍞</span><span style="font-size:25px;">🍞</span>
@@ -293,6 +331,7 @@
                     </div>
                     <div class="area-bottom">
                         <div class="bin-btn" style="background: #ff6b81; border-color: #ff4757; width: 100px; height: 80px;" onclick="cookMeat(this)">
+                            <div class="stock-badge" id="badge-meat">0</div>
                             <div style="display:flex; justify-content:center; gap:5px;"><span style="font-size:35px;">🥩</span><span style="font-size:35px;">🥩</span></div>
                         </div>
                     </div>
@@ -311,16 +350,97 @@
         }
         
         window.addEventListener('resize', updateScale);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(updateScale, 150);
-            setTimeout(updateScale, 400); 
-        });
-        
+        window.addEventListener('orientationchange', () => { setTimeout(updateScale, 150); setTimeout(updateScale, 400); });
         updateScale(); 
 
-        const DURATION = 90;
-        let timeRemaining = DURATION, money = 0, isPlaying = false, timerInt, spawnInt;
-        
+        // --- SISTEM TOKO, MODAL & TABUNGAN ---
+        let tabungan = 150; 
+        let stock = { drink: 0, icecream: 0, fries: 0, chicken: 0, pizzabase: 0, burgerbun: 0, meat: 0 };
+
+        const SHOP_ITEMS = [
+            { id: 'drink', name: '☕ Biji Kopi', price: 30, qty: 5 },
+            { id: 'icecream', name: '🍦 Sirup Es Krim', price: 50, qty: 5 },
+            { id: 'fries', name: '🥔 Kentang Mentah', price: 40, qty: 5 },
+            { id: 'chicken', name: '🍗 Ayam Mentah', price: 75, qty: 5 },
+            { id: 'pizzabase', name: '🍕 Adonan Pizza', price: 100, qty: 5 },
+            { id: 'burgerbun', name: '🍔 Roti Burger', price: 80, qty: 5 },
+            { id: 'meat', name: '🥩 Daging Sapi', price: 60, qty: 5 },
+        ];
+
+        function renderShop() {
+            let html = '';
+            SHOP_ITEMS.forEach(item => {
+                html += `
+                <div class="s-item">
+                    <div>
+                        <div style="font-size:17px; font-weight:bold;">${item.name}</div>
+                        <div style="font-size:12px; color:#bdc3c7;">Sisa Stok Anda: <span id="shop-stock-${item.id}" style="color:#f1c40f; font-weight:900; font-size:14px;">${stock[item.id]}</span></div>
+                    </div>
+                    <button onclick="buyItem('${item.id}', ${item.price}, ${item.qty}, this)">Beli 💵${item.price}<br><span style="font-size:11px;">(Dapat ${item.qty})</span></button>
+                </div>`;
+            });
+            document.getElementById('shop-items-list').innerHTML = html;
+        }
+
+        function toggleShop() {
+            document.getElementById('shop-panel').classList.toggle('open');
+            renderShop(); 
+        }
+
+        function buyItem(id, price, qty, btn) {
+            if(tabungan >= price) {
+                tabungan -= price;
+                stock[id] += qty;
+                updateUangDanStok();
+            } else {
+                shakeEl(btn); // Uang tidak cukup
+            }
+        }
+
+        function updateUangDanStok() {
+            document.getElementById('money-display').innerText = `💵 ${tabungan}`;
+            document.getElementById('badge-drink').innerText = stock.drink;
+            document.getElementById('badge-icecream').innerText = stock.icecream;
+            document.getElementById('badge-fries').innerText = stock.fries;
+            document.getElementById('badge-chicken').innerText = stock.chicken;
+            document.getElementById('badge-pizzabase').innerText = stock.pizzabase;
+            document.getElementById('badge-burgerbun').innerText = stock.burgerbun;
+            document.getElementById('badge-meat').innerText = stock.meat;
+
+            for(let key in stock) {
+                let el = document.getElementById(`shop-stock-${key}`);
+                if(el) el.innerText = stock[key];
+            }
+        }
+
+        // --- SISTEM BUKA/TUTUP TOKO (MERINTIS) ---
+        let isShopOpen = false;
+        let spawnInt;
+
+        function toggleShopStatus() {
+            isShopOpen = !isShopOpen;
+            let btn = document.getElementById('shop-status-btn');
+            
+            if (isShopOpen) {
+                btn.innerHTML = '🏪 TOKO BUKA';
+                btn.classList.remove('status-closed');
+                document.getElementById('shop-panel').classList.remove('open');
+                
+                spawnInt = setInterval(spawnCustomer, 3500); 
+                spawnCustomer();
+            } else {
+                btn.innerHTML = '🔴 TOKO TUTUP';
+                btn.classList.add('status-closed');
+                
+                clearInterval(spawnInt);
+                customers.forEach((c,i) => removeCustomer(i));
+                
+                document.getElementById('shop-panel').classList.add('open');
+                renderShop();
+            }
+        }
+
+        // --- SISTEM GAME UTAMA ---
         const MENU = [
             { icon: '☕', price: 15 }, { icon: '🍦', price: 25 },
             { icon: '🍟', price: 20 }, { icon: '🍗', price: 35 },
@@ -328,14 +448,7 @@
         ];
         const CHARS = ['👨', '👩', '👦', '👧', '👨‍🦰', '👩‍🦰'];
         let customers = [null, null, null];
-        
-        let cookingRegistry = {
-            fries: { 1: false, 2: false },
-            chicken: { 1: false, 2: false },
-            grill: { 1: false, 2: false, 3: false, 4: false },
-            oven: { 1: false, 2: false, 3: false, 4: false }
-        };
-        
+        let cookingRegistry = { fries: { 1: false, 2: false }, chicken: { 1: false, 2: false }, grill: { 1: false, 2: false, 3: false, 4: false }, oven: { 1: false, 2: false, 3: false, 4: false } };
         let burgerPlates = []; let ovenSlots = []; let pizzaServingPlates = [0, 0, 0, 0]; 
 
         function initPlates() {
@@ -347,7 +460,7 @@
         }
 
         function spawnCustomer() {
-            if(!isPlaying) return;
+            if(!isShopOpen) return; 
             const idx = customers.findIndex(c => c === null);
             if(idx !== -1) {
                 const m = MENU[Math.floor(Math.random()*MENU.length)], c = CHARS[Math.floor(Math.random()*CHARS.length)];
@@ -365,7 +478,7 @@
                 p.style.height = '100%'; p.style.background = 'linear-gradient(to top, #2ecc71, #27ae60)';
                 
                 customers[idx].int = setInterval(() => {
-                    if(!isPlaying) return;
+                    if(!isShopOpen) return;
                     customers[idx].pat -= 100;
                     let pct = (customers[idx].pat / customers[idx].max) * 100;
                     p.style.height = pct+'%';
@@ -377,120 +490,112 @@
         }
 
         function removeCustomer(i) {
-            if(customers[i]) { clearInterval(customers[i].int); customers[i] = null; document.getElementById(`char-${i}`).style.display = 'none'; document.getElementById(`ui-${i}`).style.display = 'none'; }
+            if(customers[i]) { 
+                clearInterval(customers[i].int); 
+                customers[i] = null; 
+                document.getElementById(`char-${i}`).style.display = 'none'; 
+                document.getElementById(`ui-${i}`).style.display = 'none'; 
+            }
         }
 
         function shakeEl(el) { el.classList.add('shake'); setTimeout(() => el.classList.remove('shake'), 400); }
         function popEl(el) { el.classList.add('food-pop'); setTimeout(() => el.classList.remove('food-pop'), 200); }
-
-        function runProgressBar(wrapId, duration) {
-            let wrap = document.getElementById(wrapId);
-            if(wrap) {
-                wrap.style.display = 'block';
-                wrap.innerHTML = `<div class="prog-fill" style="animation: runLoadingBar ${duration}ms linear forwards;"></div>`;
-            }
-        }
-
-        function pressEl(el) {
-            if(!el) return;
-            el.style.transform = 'scale(0.9)';
-            setTimeout(() => { el.style.transform = ''; }, 100);
-        }
+        function runProgressBar(wrapId, duration) { let wrap = document.getElementById(wrapId); if(wrap) { wrap.style.display = 'block'; wrap.innerHTML = `<div class="prog-fill" style="animation: runLoadingBar ${duration}ms linear forwards;"></div>`; } }
+        function pressEl(el) { if(!el) return; el.style.transform = 'scale(0.9)'; setTimeout(() => { el.style.transform = ''; }, 100); }
 
         function handleMachineClick(type, icon, t, wrapperEl) {
-            if(!isPlaying) return;
-
+            // 1. CARI APAKAH ADA CUSTOMER YANG MAU PESANAN INI
             let custIdx = customers.findIndex(c => c && c.menu.icon === icon);
-            let readySlotIdx = -1;
             
-            for(let i=1; i<=3; i++) {
-                let slot = document.getElementById(`plate-${type}-${i}`);
-                if(slot && slot.getAttribute('data-state') === 'ready') { readySlotIdx = i; break; }
+            // 2. CARI APAKAH ADA MAKANAN YANG SUDAH JADI (READY)
+            let readySlotIdx = -1;
+            for(let i=1; i<=3; i++) { 
+                let slot = document.getElementById(`plate-${type}-${i}`); 
+                if(slot && slot.getAttribute('data-state') === 'ready') { readySlotIdx = i; break; } 
             }
 
-            if(custIdx !== -1 && readySlotIdx !== -1) {
+            // 3. PRIORITAS PERTAMA: SAJIKAN MAKANAN JIKA ADA CUSTOMER & MAKANAN READY
+            if(custIdx !== -1 && readySlotIdx !== -1 && isShopOpen) {
                 pressEl(wrapperEl);
-                money += customers[custIdx].menu.price; 
-                document.getElementById('money-display').innerText = `💵 ${money}`;
+                tabungan += customers[custIdx].menu.price; 
+                updateUangDanStok();
                 
                 let slot = document.getElementById(`plate-${type}-${readySlotIdx}`);
-                slot.innerHTML = '';
-                slot.removeAttribute('data-food');
+                slot.innerHTML = ''; 
+                slot.removeAttribute('data-food'); 
                 slot.setAttribute('data-state', 'empty');
                 removeCustomer(custIdx);
+                return; // Selesai, jangan lanjut cek stok ke bawah!
+            }
+
+            // 4. JIKA TIDAK ADA YANG BISA DISAJIKAN, BERARTI MAU MASAK BARU. CEK STOK DULU!
+            if(stock[type] <= 0) { 
+                shakeEl(wrapperEl); 
+                document.getElementById('shop-panel').classList.add('open'); 
+                renderShop(); 
                 return; 
-            }
+            } 
 
+            // 5. CARI SLOT KOSONG UNTUK MASAK
             let emptySlotIdx = -1;
-            for(let i=1; i<=3; i++) {
-                let slot = document.getElementById(`plate-${type}-${i}`);
-                if(slot && slot.getAttribute('data-state') === 'empty') { emptySlotIdx = i; break; }
+            for(let i=1; i<=3; i++) { 
+                let slot = document.getElementById(`plate-${type}-${i}`); 
+                if(slot && slot.getAttribute('data-state') === 'empty') { emptySlotIdx = i; break; } 
             }
 
-            if(emptySlotIdx === -1) { shakeEl(wrapperEl); return; } 
-
+            if(emptySlotIdx === -1) { shakeEl(wrapperEl); return; } // Slot penuh
+            
+            // 6. MULAI MASAK
+            stock[type]--; 
+            updateUangDanStok();
             pressEl(wrapperEl);
-            let imgEl = wrapperEl.querySelector('.machine-img');
+            
+            let imgEl = wrapperEl.querySelector('.machine-img'); 
             if(imgEl) imgEl.classList.add('machine-working');
-
+            
             let slot = document.getElementById(`plate-${type}-${emptySlotIdx}`);
             slot.setAttribute('data-state', 'cooking');
 
-            if (type === 'drink') {
-                slot.innerHTML = `<div class="craft-wrap"><div class="craft-stream stream-d" style="animation-duration: ${t}ms;"></div><div class="craft-cup"><div class="craft-liquid" style="animation-duration: ${t}ms;"></div></div></div>`;
-            } else {
-                slot.innerHTML = `<div class="craft-wrap"><div class="craft-stream stream-ic" style="animation-duration: ${t}ms;"></div><div class="craft-cream" style="animation-duration: ${t}ms;"></div><div class="craft-cone"></div></div>`;
-            }
+            if (type === 'drink') slot.innerHTML = `<div class="craft-wrap"><div class="craft-stream stream-d" style="animation-duration: ${t}ms;"></div><div class="craft-cup"><div class="craft-liquid" style="animation-duration: ${t}ms;"></div></div></div>`;
+            else slot.innerHTML = `<div class="craft-wrap"><div class="craft-stream stream-ic" style="animation-duration: ${t}ms;"></div><div class="craft-cream" style="animation-duration: ${t}ms;"></div><div class="craft-cone"></div></div>`;
 
             setTimeout(() => {
                 if(slot.getAttribute('data-state') === 'cooking') {
-                    slot.setAttribute('data-state', 'ready');
-                    slot.setAttribute('data-food', icon); 
-                    slot.innerHTML = `<div class="ready-food">${icon}</div>`;
-                    popEl(slot);
+                    slot.setAttribute('data-state', 'ready'); slot.setAttribute('data-food', icon); 
+                    slot.innerHTML = `<div class="ready-food">${icon}</div>`; popEl(slot);
                 }
-                
                 let isStillCooking = false;
-                for(let i=1; i<=3; i++) {
-                    let s = document.getElementById(`plate-${type}-${i}`);
-                    if(s && s.getAttribute('data-state') === 'cooking') isStillCooking = true;
-                }
+                for(let i=1; i<=3; i++) { let s = document.getElementById(`plate-${type}-${i}`); if(s && s.getAttribute('data-state') === 'cooking') isStillCooking = true; }
                 if(!isStillCooking && imgEl) imgEl.classList.remove('machine-working');
             }, t);
         }
 
         function cookIndependent(type, icon, t, limit, btnEl) {
-            if(!isPlaying) return;
             let targetIdx = -1;
-            
-            for(let i=1; i<=limit; i++) {
-                let el = document.getElementById(`plate-${type}-${i}`);
-                if(el && !el.getAttribute('data-food') && !cookingRegistry[type][i]) { 
-                    targetIdx = i; 
-                    break; 
-                }
-            }
+            for(let i=1; i<=limit; i++) { let el = document.getElementById(`plate-${type}-${i}`); if(el && !el.getAttribute('data-food') && !cookingRegistry[type][i]) { targetIdx = i; break; } }
             if(targetIdx === -1) { shakeEl(btnEl); return; }
-            
-            pressEl(btnEl);
-            cookingRegistry[type][targetIdx] = true;
-            runProgressBar(`prog-wrap-${type}-${targetIdx}`, t);
+            if(stock[type] <= 0) { shakeEl(btnEl); document.getElementById('shop-panel').classList.add('open'); renderShop(); return; }
+
+            stock[type]--; updateUangDanStok();
+            pressEl(btnEl); cookingRegistry[type][targetIdx] = true; runProgressBar(`prog-wrap-${type}-${targetIdx}`, t);
 
             setTimeout(() => {
                 cookingRegistry[type][targetIdx] = false;
-                let wrap = document.getElementById(`prog-wrap-${type}-${targetIdx}`);
-                if(wrap) wrap.style.display = 'none';
-
+                let wrap = document.getElementById(`prog-wrap-${type}-${targetIdx}`); if(wrap) wrap.style.display = 'none';
                 let el = document.getElementById(`plate-${type}-${targetIdx}`);
-                if(el) { 
-                    el.innerHTML = icon; 
-                    el.setAttribute('data-food', icon); 
-                    popEl(el); 
-                }
+                if(el) { el.innerHTML = icon; el.setAttribute('data-food', icon); popEl(el); }
             }, t);
         }
 
-        function cookMeat(bin) { cookIndependent('grill', '🥩', 3000, 4, bin); }
+        function cookMeat(bin) { 
+            let targetIdx = -1;
+            for(let i=1; i<=4; i++) { let el = document.getElementById(`plate-grill-${i}`); if(el && !el.getAttribute('data-food') && !cookingRegistry['grill'][i]) { targetIdx = i; break; } }
+            if(targetIdx === -1) { shakeEl(bin); return; }
+            if(stock.meat <= 0) { shakeEl(bin); document.getElementById('shop-panel').classList.add('open'); renderShop(); return; }
+
+            stock.meat--; updateUangDanStok();
+            cookIndependent('grill', '🥩', 3000, 4, bin); 
+        }
 
         function isEmptyBurger(p) { return p.buns === 0 && !p.meat && !p.tom && !p.let && !p.done; }
         function findBurgerSlot(ing) {
@@ -501,37 +606,25 @@
         }
 
         function addBurgerIng(ing, btn) {
-            if(!isPlaying) return;
             let idx = findBurgerSlot(ing);
             if(idx === -1) { shakeEl(btn); return; }
-            
-            pressEl(btn);
-            let p = burgerPlates[idx];
+            if(ing === '🍞') { if(stock.burgerbun <= 0) { shakeEl(btn); document.getElementById('shop-panel').classList.add('open'); renderShop(); return; } stock.burgerbun--; updateUangDanStok(); }
+
+            pressEl(btn); let p = burgerPlates[idx];
             if (ing === '🍞') p.buns++; else if (ing === '🍅') p.tom = true; else if (ing === '🥬') p.let = true;
             checkBurgerComplete(idx);
-            
-            let el = document.getElementById(`plate-burger-${idx+1}`);
-            if(el) popEl(el);
+            let el = document.getElementById(`plate-burger-${idx+1}`); if(el) popEl(el);
         }
 
         function moveMeatToBurger(source) {
-            if(!isPlaying || source.getAttribute('data-food') !== '🥩') { shakeEl(source); return; }
-            let idx = findBurgerSlot('🥩');
-            if(idx === -1) { shakeEl(source); return; }
+            if(source.getAttribute('data-food') !== '🥩') { shakeEl(source); return; }
+            let idx = findBurgerSlot('🥩'); if(idx === -1) { shakeEl(source); return; }
             
-            burgerPlates[idx].meat = true; 
-            source.innerHTML = ''; source.removeAttribute('data-food');
-            checkBurgerComplete(idx);
-            
-            let el = document.getElementById(`plate-burger-${idx+1}`);
-            if(el) popEl(el);
+            burgerPlates[idx].meat = true; source.innerHTML = ''; source.removeAttribute('data-food');
+            checkBurgerComplete(idx); let el = document.getElementById(`plate-burger-${idx+1}`); if(el) popEl(el);
         }
 
-        function checkBurgerComplete(idx) {
-            let p = burgerPlates[idx];
-            if (p.buns === 2 && p.meat && p.tom && p.let) p.done = true;
-            renderBurgerPlate(idx);
-        }
+        function checkBurgerComplete(idx) { let p = burgerPlates[idx]; if (p.buns === 2 && p.meat && p.tom && p.let) p.done = true; renderBurgerPlate(idx); }
 
         function renderBurgerPlate(idx) {
             let el = document.getElementById(`plate-burger-${idx+1}`); let p = burgerPlates[idx]; el.innerHTML = '';
@@ -548,12 +641,8 @@
         function serveBurger(num) {
             let idx = num-1;
             if(burgerPlates[idx].done) {
-                let el = document.getElementById(`plate-burger-${num}`);
-                el.setAttribute('data-food', '🍔'); 
-                selectFood('🍔', el, () => {
-                    burgerPlates[idx] = {buns:0, meat:false, tom:false, let:false, done:false}; 
-                    renderBurgerPlate(idx); 
-                });
+                let el = document.getElementById(`plate-burger-${num}`); el.setAttribute('data-food', '🍔'); 
+                selectFood('🍔', el, () => { burgerPlates[idx] = {buns:0, meat:false, tom:false, let:false, done:false}; renderBurgerPlate(idx); });
             } else if (!isEmptyBurger(burgerPlates[idx])) { shakeEl(document.getElementById(`plate-burger-${num}`)); }
         }
 
@@ -565,28 +654,20 @@
         }
 
         function addPizzaIng(ing, btn) {
-            if(!isPlaying) return;
-            let idx = findPizzaSlot(ing);
-            if (idx === -1) { shakeEl(btn); return; }
-            
-            pressEl(btn);
-            let p = ovenSlots[idx];
+            let idx = findPizzaSlot(ing); if (idx === -1) { shakeEl(btn); return; }
+            if(ing === '🍞') { if(stock.pizzabase <= 0) { shakeEl(btn); document.getElementById('shop-panel').classList.add('open'); renderShop(); return; } stock.pizzabase--; updateUangDanStok(); }
+
+            pressEl(btn); let p = ovenSlots[idx];
             if (ing === '🍞') p.bread = true; else if (ing === '🧅') p.oni = true; else if (ing === '🌭') p.sau = true;
-            renderOvenSlot(idx);
-            
-            let el = document.getElementById(`oven-content-${idx+1}`);
-            if(el) popEl(el);
-            
+            renderOvenSlot(idx); let el = document.getElementById(`oven-content-${idx+1}`); if(el) popEl(el);
             if (p.bread && p.oni && p.sau) { startPizzaCooking(idx); }
         }
 
         function renderOvenSlot(idx) {
             let contentEl = document.getElementById(`oven-content-${idx+1}`); let p = ovenSlots[idx]; contentEl.innerHTML = '';
-            if (p.done) { contentEl.innerHTML = '<div style="font-size:25px;">🍕</div>'; } 
-            else if (p.cooking) { contentEl.innerHTML = '<div style="font-size:20px; color:#f1c40f;">⏳</div>'; } 
+            if (p.done) { contentEl.innerHTML = '<div style="font-size:25px;">🍕</div>'; } else if (p.cooking) { contentEl.innerHTML = '<div style="font-size:20px; color:#f1c40f;">⏳</div>'; } 
             else if (!isEmptyPizza(p)) {
-                let html = p.bread ? '<div style="width: 25px; height: 25px; background: #f3c76d; border: 2px solid #e1a328; border-radius: 50%; position: absolute; z-index: 1;"></div>' 
-                                   : '<div style="width: 25px; height: 25px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 50%; position: absolute; z-index: 1;"></div>';
+                let html = p.bread ? '<div style="width: 25px; height: 25px; background: #f3c76d; border: 2px solid #e1a328; border-radius: 50%; position: absolute; z-index: 1;"></div>' : '<div style="width: 25px; height: 25px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 50%; position: absolute; z-index: 1;"></div>';
                 html += '<div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 10px;">';
                 if(p.oni) html += `<img src="./bawang.png" onerror="this.outerHTML='<div style=line-height:0.5;margin-top:2px;>🧅</div>'" style="width: 20px; height: 20px; position: absolute; z-index: 3; top: -5px;" alt="onion">`;
                 if(p.sau) html += '<div style="line-height: 0.5;">🌭</div>';
@@ -595,19 +676,10 @@
         }
 
         function startPizzaCooking(idx) {
-            ovenSlots[idx].cooking = true; renderOvenSlot(idx); 
-            cookingRegistry.oven[idx+1] = true;
-            
-            runProgressBar(`prog-wrap-oven-${idx+1}`, 4000);
-            
+            ovenSlots[idx].cooking = true; renderOvenSlot(idx); cookingRegistry.oven[idx+1] = true; runProgressBar(`prog-wrap-oven-${idx+1}`, 4000);
             setTimeout(() => {
-                cookingRegistry.oven[idx+1] = false; 
-                ovenSlots[idx].cooking = false; 
-                ovenSlots[idx].done = true;
-                
-                let wrap = document.getElementById(`prog-wrap-oven-${idx+1}`);
-                if(wrap) wrap.style.display = 'none';
-
+                cookingRegistry.oven[idx+1] = false; ovenSlots[idx].cooking = false; ovenSlots[idx].done = true;
+                let wrap = document.getElementById(`prog-wrap-oven-${idx+1}`); if(wrap) wrap.style.display = 'none';
                 let sPlateIdx = pizzaServingPlates.findIndex(s => s === 0);
                 if (sPlateIdx !== -1) { pizzaServingPlates[sPlateIdx] = 1; ovenSlots[idx] = { bread: false, oni: false, sau: false, cooking: false, done: false }; renderServingPizza(sPlateIdx); }
                 renderOvenSlot(idx);
@@ -615,7 +687,6 @@
         }
 
         function manualMovePizza(num) {
-            if(!isPlaying) return;
             let idx = num - 1;
             if (ovenSlots[idx].done) {
                 let sPlateIdx = pizzaServingPlates.findIndex(s => s === 0);
@@ -625,14 +696,8 @@
 
         function renderServingPizza(idx) {
             let el = document.getElementById(`plate-saji-pizza-${idx+1}`);
-            if (pizzaServingPlates[idx] === 1) { 
-                el.innerHTML = '<div style="font-size: 35px;">🍕</div>'; 
-                el.setAttribute('data-food', '🍕');
-                popEl(el); 
-            } else { 
-                el.innerHTML = ''; 
-                el.removeAttribute('data-food');
-            }
+            if (pizzaServingPlates[idx] === 1) { el.innerHTML = '<div style="font-size: 35px;">🍕</div>'; el.setAttribute('data-food', '🍕'); popEl(el); } 
+            else { el.innerHTML = ''; el.removeAttribute('data-food'); }
         }
 
         function servePizza(num) {
@@ -648,52 +713,27 @@
         }
 
         function selectFood(icon, el, cb) {
-            if(!isPlaying) return;
+            // Bisa jualan cuma kalau toko BUKA
+            if(!isShopOpen) { shakeEl(document.getElementById('shop-status-btn')); return; } 
             if(el.getAttribute('data-food') !== icon) { shakeEl(el); return; }
             
             let idx = customers.findIndex(c => c && c.menu.icon === icon);
             if(idx !== -1) {
-                money += customers[idx].menu.price; 
-                document.getElementById('money-display').innerText = `💵 ${money}`;
+                tabungan += customers[idx].menu.price; updateUangDanStok();
                 if(cb) { cb(); } else { el.innerHTML = ''; el.removeAttribute('data-food'); }
                 removeCustomer(idx);
             } else { shakeEl(el); }
         }
-
-        function restartGame() {
-            timeRemaining = DURATION; money = 0; isPlaying = true;
-            document.getElementById('money-display').innerText = `💵 0`; document.getElementById('game-over').style.display = 'none'; document.getElementById('timer-bar-fill').style.background = 'linear-gradient(90deg, #2ecc71, #27ae60)';
-            
-            document.querySelectorAll('.plate-c, .plate-s, .internal-slot').forEach(el => { 
-                el.innerHTML = ''; el.removeAttribute('data-food');
-                if(el.classList.contains('internal-slot')) el.setAttribute('data-state', 'empty'); 
-            });
-            document.querySelectorAll('.prog-bar').forEach(el => el.style.display = 'none');
-            
-            cookingRegistry = {
-                fries: { 1: false, 2: false },
-                chicken: { 1: false, 2: false },
-                grill: { 1: false, 2: false, 3: false, 4: false },
-                oven: { 1: false, 2: false, 3: false, 4: false }
-            };
-
-            initPlates();
-            for(let i=0; i<4; i++) { renderBurgerPlate(i); renderOvenSlot(i); renderServingPizza(i); }
-            customers.forEach((c,i) => removeCustomer(i));
-            
-            clearInterval(timerInt); clearInterval(spawnInt);
-            
-            timerInt = setInterval(() => {
-                timeRemaining--; let pct = (timeRemaining/DURATION)*100; document.getElementById('timer-bar-fill').style.width = pct+'%';
-                if(timeRemaining <= 0) { isPlaying = false; clearInterval(timerInt); clearInterval(spawnInt); document.getElementById('final-score').innerText = `Pendapatan Akhir: 💵 ${money}`; document.getElementById('game-over').style.display = 'flex'; }
-            }, 1000);
-            
-            spawnInt = setInterval(spawnCustomer, 3500); spawnCustomer();
-        }
         
         document.addEventListener('touchstart', function() {}, {passive: true});
 
-        initPlates(); restartGame();
+        // INIT SAAT PERTAMA LOAD
+        initPlates();
+        updateUangDanStok();
+        
+        // Mulai dengan kondisi Toko Tutup & Panel Terbuka agar pemain bisa belanja dulu
+        document.getElementById('shop-panel').classList.add('open');
+        renderShop();
     </script>
 </body>
 </html>
