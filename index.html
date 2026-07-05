@@ -13,11 +13,15 @@
             -webkit-touch-callout: none; 
             user-select: none; -webkit-user-select: none;
             box-sizing: border-box; 
+            /* FIX IOS: Mencegah iOS mengira tap sebagai gestur scroll/zoom sehingga klik instan */
+            touch-action: none;
         }
         
         body, html {
             margin: 0; padding: 0; width: 100vw; 
             height: 100vh; height: 100dvh; 
+            /* FIX IOS: Kompatibilitas untuk versi iOS lama */
+            min-height: -webkit-fill-available;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             display: flex; justify-content: center; align-items: center; 
             background-color: #1e272e; font-family: 'Nunito', sans-serif; 
@@ -306,8 +310,15 @@
             const scaleY = window.innerHeight / 650;
             wrapper.style.transform = `scale(${Math.min(scaleX, scaleY) * 0.90})`;
         }
+        
         window.addEventListener('resize', updateScale);
-        window.addEventListener('orientationchange', updateScale);
+        
+        /* FIX IOS: Safari membutuhkan waktu jeda untuk membaca ukuran layar sebenarnya saat diputar */
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateScale, 150);
+            setTimeout(updateScale, 400); 
+        });
+        
         updateScale(); 
 
         const DURATION = 90;
@@ -687,6 +698,9 @@
             spawnInt = setInterval(spawnCustomer, 3500); spawnCustomer();
         }
         
+        /* FIX IOS: Daftarkan global listener ringan agar state ':active' dan 'onclick' di Safari iPhone berfungsi dengan sempurna tanpa harus double tap */
+        document.addEventListener('touchstart', function() {}, {passive: true});
+
         initPlates(); restartGame();
     </script>
 </body>
